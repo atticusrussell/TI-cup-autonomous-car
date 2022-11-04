@@ -63,14 +63,19 @@ edgeNear = 0;
 onTrack = 1;
 
 
-// [ ] implement logic conditionals
-// [ ] call update functions
-// [ ] create servo functions in that file
-// [ ] create DC motor functions in that file
-// [ ] test camera functionality
-// [ ] create camera functions in that file (HARD) :(
-// [ ] specific carpet detection (milestone 1)
-// [ ] use the camera to see if on the track
+// [x] implement logic conditionals
+// [x] call update functions
+// [ ] create abstract turning functions in this file
+// [ ] refine existing servo code with callable functions
+// [ ] create abstract DC motor speed function in this file
+// [ ] implement motor speed and dir funcs in existing file
+// [ ] test camera functionality/ look at the MATLAB plot of the track lab5 code
+// [ ] create function to use the camera to see if on the track
+// [ ] create specific carpet detection function in some file (milestone 1)
+// [ ] create function to detect edge with camera
+// [ ] create function to report edge direction with camera 
+// NOTE maybe direction not totally necessary - could possibly pick a servo
+//		direction at random and just see if edge gets closer or further.
 
 
 int main(void){
