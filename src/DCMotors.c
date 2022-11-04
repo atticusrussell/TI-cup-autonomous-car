@@ -28,35 +28,6 @@ void delay(int del){
 	}
 }
 
-//void control_speed(int){}
-void forward(){
-	int i=0;
-	int waitNo = 1; //delay in the for loop 
-
-	// 0 to 100% duty cycle in forward direction
-	for (i=0; i<100; i++) {
-			// INSERT CODE HERE
-		TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward left motor
-		TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward right motor
-		delay(waitNo);
-	}
-}
-
-void reverse(){
-	int i=0;
-	int waitNo = 1; //delay in the for loop
-	
-	// 0 to 100% duty cycle in reverse direction
-	for (i=0; i<100; i++) {
-			// INSERT CODE HERE
-		TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
-		TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
-			
-		delay(waitNo);
-	}
-
-}
-
 int main(void) {
 	// Initialize UART and PWM
 	uart0_init();
