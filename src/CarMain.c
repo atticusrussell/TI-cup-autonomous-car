@@ -18,16 +18,13 @@
 #define NORMAL_SPEED 	(10)
 // slower motor duty cycle for turns
 #define TURN_SPEED 		(5)
-
 // turn increments (tuning how hard we turn) - unitless rn
 #define TURN_INCREMENT (3)
 
 
-// TODO in future see if we want to run processor at faster 48 MHz clk for 
+// FUTURE  see if we want to run processor at faster 48 MHz clk for 
 //		responsiveness
-// NOTE we want to abstract away the hardware details in main
-
-
+// FUTURE implement error handling
 
 
 /* define the variables here that define state of car and we're gonna modify */
@@ -51,7 +48,7 @@ signed int edgeDir;
 BOOLEAN onTrack;
 
 /* currently unused but things to implement */
-// distance to the edge if we know it/ can find it
+// FUTURE distance to the edge if we know it/ can find it
 // int edgeDist;
 
 
@@ -67,17 +64,33 @@ onTrack = 1;
 // [x] call update functions
 // [ ] create abstract turning functions in this file
 // [ ] refine existing servo code with callable functions
+// [ ] test with hardware the servo function
 // [ ] create abstract DC motor speed function in this file
 // [ ] implement motor speed and dir funcs in existing file
+// [ ] test in hardware the motor function
 // [ ] test camera functionality/ look at the MATLAB plot of the track lab5 code
 // [ ] create function to use the camera to see if on the track
 // [ ] create specific carpet detection function in some file (milestone 1)
 // [ ] create function to detect edge with camera
 // [ ] create function to report edge direction with camera 
-// NOTE maybe direction not totally necessary - could possibly pick a servo
-//		direction at random and just see if edge gets closer or further.
+// NOTE maybe direction not totally necessary - could possibly pick a direction at random and just see if edge gets closer or further.
 
 
+
+/**
+ * @brief Call servo file to set direction of wheels
+ * 
+ * @param angle est. angle of wheels in degrees. 0 = straight, + right -left.
+ */
+void set_steering(signed int angle){
+	
+}
+
+
+
+
+
+// NOTE we want to abstract away the hardware details in main
 int main(void){
 
 	// infinite loop to contain logic
@@ -107,7 +120,7 @@ int main(void){
 		} else {
 			/* not on track */
 			motorSpeed = 0; // stop the car
-			// NOTE in future reverse back onto track maybe
+			// FUTURE in future reverse back onto track maybe
 		}
 
 		/* call the code -> real world update functions */
@@ -124,7 +137,5 @@ int main(void){
 
 	}
 	
-	// never reached due to infinite while loop
-	return 0;
-	
+	return 0;  // never reached due to infinite while loop
 }
