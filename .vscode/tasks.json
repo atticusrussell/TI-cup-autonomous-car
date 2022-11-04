@@ -1,0 +1,390 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Import settings from Keil's v4 or v5 project",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "Scripts/_parse_Keil_project.py",
+        "${relativeFile}",
+        ".vscode/c_cpp_properties.json",
+        "Scripts/_set_Keil_project_paths.bat"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_build.bat",
+      "args": [
+        "${command:cpptools.activeConfigName}"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "ALL build by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_ALL_build.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "[DBG] ALL build by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_DBG_ALL_build.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "[REL] ALL build by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_REL_ALL_build.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Rebuild by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_rebuild.bat",
+      "args": [
+        "${command:cpptools.activeConfigName}"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "[REL] ALL rebuild by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_REL_ALL_rebuild.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "[DBG] ALL rebuild by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_DBG_ALL_rebuild.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "ALL rebuild by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_ALL_rebuild.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "ALL clean by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_ALL_clean.bat",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Program Flash by Keil",
+      "type": "shell",
+      "command": "${workspaceFolder}/Scripts/start_program_flash.bat",
+      "args": [
+        "${command:cpptools.activeConfigName}"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d*)\\):\\s*(.rror|.arning|.nfo):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4,
+          "column": -1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Open project in Keil",
+      "type": "shell",
+      "command": "uv4",
+      "args": [
+        "${workspaceFolder}/cmpe460Lab05.uvprojx"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
