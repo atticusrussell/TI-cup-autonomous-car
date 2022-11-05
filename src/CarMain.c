@@ -51,6 +51,7 @@ BOOLEAN onTrack;
 // FUTURE distance to the edge if we know it/ can find it
 // int edgeDist;
 
+// FUTURE centralize delay function
 
 /* initialize state variables to starting values */
 motorDir = FWD;
@@ -83,15 +84,31 @@ onTrack = 1;
  * @param angle est. angle of wheels in degrees. 0 = straight, + right -left.
  */
 void set_steering(signed int angle){
-	
+	// TODO call the servo functions in some smart way
 }
 
 
-
+/**
+ * @brief waits for a delay (in milliseconds)
+ * 
+ * @param del - The delay in milliseconds
+ * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
+ */
+void delay(int del){
+	volatile int i;
+	for (i=0; i<del*50000; i++){
+		;// Do nothing
+	}
+}
 
 
 // NOTE we want to abstract away the hardware details in main
 int main(void){
+	// TODO call initialization function for servo
+
+	// TODO call initialization function for motor
+
+	// TODO call initialization function for camera
 
 	// infinite loop to contain logic
 	while(1){
