@@ -27,7 +27,7 @@
 
 
 //int servoPeriod;
-double oneDegDC = 0.5/MAX_ANGLE_DEG;
+double oneDegDC = 0.5/SERVO_MAX_ANGLE_DEG;
 
 
 
@@ -66,20 +66,21 @@ void delay(int del){
 		* 	A 2.0ms pulse says to turn 90o in the clockwise direction
 		*/
 void servo_init(void){
-	int servoPeriod = SERVO_CLK/PWM_FREQ_HZ;
-	double servoStraightDC = 1.5/servoPeriod;
+	uint16_t timerPeriod = SERVO_CLK/SERVO_PWM_FREQ_HZ;
+	double servoStraightDC = 1.5/SERVO_PWM_PERIOD_MS;
 	
 	// TODO start with servo straight -> initialize to 1.5 ms
-	TIMER_A2_PWM_Init(servoPeriod, servoStraightDC, 1); 
+	TIMER_A2_PWM_Init(timerPeriod, servoStraightDC, 1); 
 }
 
 
 /**
  * @brief Set the duty cycle of the servo
  * 
- * @param servoDC the new duty cycle to set the servo to. is a num 0 to 1 
+ * @param servoPulse the duration of the pulse to set. From 1 to 2 ms. 
  */
-void set_servo_DC(double servoDC){
+void set_servo_pulse(double servoPulse){
+	double servoDC = servoPulse/SERVO_PWM_PERIOD_MS;
 	TIMER_A2_PWM_DutyCycle(servoDC, 1);
 }
 
@@ -104,30 +105,36 @@ int sign(int x) {
 void set_steering_deg(int16_t steeringAngle){
 	int direction = sign(steeringAngle); 
 	// make sure that it is within the correct bounds
-	if (abs(steeringAngle) > MAX_ANGLE_DEG){
+	if (abs(steeringAngle) > SERVO_MAX_ANGLE_DEG){
 		if(direction == -1){
-			steeringAngle = -MAX_ANGLE_DEG;
+			steeringAngle = -SERVO_MAX_ANGLE_DEG;
 		} else{
-			steeringAngle = MAX_ANGLE_DEG;
+			steeringAngle = SERVO_MAX_ANGLE_DEG;
 		}
 	}
 	/* A 1.5ms pulse says do not turn at all
 	* 	A 1.0ms pulse says to turn 90o	counter-clockwise
 	* 	A 2.0ms pulse says to turn 90o in the clockwise direction	 */
 	// FUTURE maybe don't do a floating point multiply in the future
-	double servoDC= 1 +  (direction * steeringAngle * oneDegDC);
+	// 1.5 + ( +-1)*(value from 60 to 60)*(0.5/60)
+	double servoPulse= 1.5 +  (direction * steeringAngle * oneDegDC);
 
-	set_servo_DC(servoDC);
+	set_servo_pulse(servoPulse);
 
 }
 	
 
 int main(void){
 	servo_init();
+	set_steering_deg(-60);
+	delay(100);
+	set_steering_deg(60);
+	delay(100);
 	while(1){
 		for(int i=-60;i<61;i+=15){
 			set_steering_deg(i);
-			delay(5);
+			delay(100);
 		}
 	}
+	// return 0; // unreachable
 }
