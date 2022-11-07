@@ -68,7 +68,7 @@
 //     <12000000> 12 MHz
 //     <24000000> 24 MHz
 //     <48000000> 48 MHz
-#define  __SYSTEM_CLOCK    3000000
+#define  __SYSTEM_CLOCK    48000000
 
 /*--------------------- Power Regulator Configuration -----------------------*/
 //  Power Regulator Mode
@@ -387,8 +387,12 @@ void SystemInit(void)
     #endif
 
     // 3 flash wait states (BANK0 VCORE1 max is 16 MHz, BANK1 VCORE1 max is 32 MHz)
-    FLCTL_A->BANK0_RDCTL &= ~FLCTL_A_BANK0_RDCTL_WAIT_MASK | FLCTL_A_BANK0_RDCTL_WAIT_3;
-    FLCTL_A->BANK1_RDCTL &= ~FLCTL_A_BANK1_RDCTL_WAIT_MASK | FLCTL_A_BANK1_RDCTL_WAIT_3;
+	FLCTL_A->BANK0_RDCTL = (FLCTL_A->BANK0_RDCTL & ~(FLCTL_A_BANK0_RDCTL_WAIT_MASK)) | FLCTL_A_BANK0_RDCTL_WAIT_3;
+	FLCTL_A->BANK1_RDCTL = (FLCTL_A->BANK0_RDCTL & ~(FLCTL_A_BANK1_RDCTL_WAIT_MASK)) | FLCTL_A_BANK1_RDCTL_WAIT_3;
+// LINES REPLACED ACCORDING TO BEATO ABOVE
+//    FLCTL_A->BANK0_RDCTL &= ~FLCTL_A_BANK0_RDCTL_WAIT_MASK | FLCTL_A_BANK0_RDCTL_WAIT_3; 
+//    FLCTL_A->BANK1_RDCTL &= ~FLCTL_A_BANK1_RDCTL_WAIT_MASK | FLCTL_A_BANK1_RDCTL_WAIT_3;
+	
 
     // DCO = 48 MHz; MCLK = source
     CS->KEY = CS_KEY_VAL;                                                         // Unlock CS module for register access
