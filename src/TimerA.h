@@ -9,7 +9,9 @@
  *
  */
  
+#include <stdint.h>
 #include "Common.h"
+
 
 #ifndef _TIMERA_HEADER_FILE_
 #define _TIMERA_HEADER_FILE_
@@ -21,4 +23,3 @@
  void TIMER_A2_PWM_DutyCycle(double percentDutyCycle, uint16_t pin);
  
  #endif
- 
