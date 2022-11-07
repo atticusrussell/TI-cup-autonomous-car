@@ -1,5 +1,3 @@
-# ignore everything
-*
 # except the following
 # don't ignore this actual file
 !.gitignore
@@ -16,4 +14,7 @@
 .vscode/settings.json
 #don't ignore the files that change the device config
 !RTE/Device/MSP432P4111/system_msp432p4111.c
-# !RTE/Device/MSP432P4111/startup_msp432p4111_uvision.s
+!RTE/Device/MSP432P4111/startup_msp432p4111_uvision.s
+
+# ignore everything else
+*
