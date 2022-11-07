@@ -400,4 +400,3 @@ void TIMER_A2_PWM_DutyCycle(double percentDutyCycle, uint16_t pin)
 {
 	TIMER_A2->CCR[pin] = (uint16_t)(percentDutyCycle * (double)DEFAULT_PERIOD_A2[pin]);
 }
-

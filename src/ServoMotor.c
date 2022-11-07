@@ -12,28 +12,40 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "msp.h"
 #include "TimerA.h"
 #include "ServoMotor.h"
 
 
 
-// which way to turn but encoded as ints
-enum turnDir{
-	Left = -1,
-	Right = 1
-} direction;
+// // which way to turn but encoded as ints
+// enum turnDir{
+// 	Left = -1,
+// 	Right = 1
+// } direction;
 
 
-uint16_t servoPeriod;
+//int servoPeriod;
 double oneDegDC = 0.5/MAX_ANGLE_DEG;
 
 
 
-// TODO create a header file
-
+/**
+ * @brief waits for a delay (in milliseconds)
+ * 
+ * @param del - The delay in milliseconds
+ * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
+ */
+void delay(int del){
+	volatile int i;
+	for (i=0; i<del*50000; i++){
+		;// Do nothing
+	}
+}
 	
-void servo_init(void){
+
+
 	/* start puzzling comments from prior lab */
 	//initialize cycles for period
 	// uint32_t clkFrq = 3000000; // 3 MHz
@@ -41,7 +53,6 @@ void servo_init(void){
 	// uint16_t period = clkFrq / desiredServoFrq;
 	/* end puzzling comments from prior lab */
 	// TODO  i think that servo is pin 5.6 on the board
-	
 	/**
 	 * notes from slides about NXP car servo
 	 * microcontrollers tell the controller boards inside servos where to
@@ -54,7 +65,8 @@ void servo_init(void){
 		* 	A 1.0ms pulse says to turn 90o	counter-clockwise
 		* 	A 2.0ms pulse says to turn 90o in the clockwise direction
 		*/
-	servoPeriod = SERVO_CLK/PWM_FREQ_HZ;
+void servo_init(void){
+	int servoPeriod = SERVO_CLK/PWM_FREQ_HZ;
 	double servoStraightDC = 1.5/servoPeriod;
 	
 	// TODO start with servo straight -> initialize to 1.5 ms
@@ -90,10 +102,10 @@ int sign(int x) {
  * @note using int for now - FUTURE convert to float if more precision needed
  */
 void set_steering_deg(int16_t steeringAngle){
-	direction = sign(steeringAngle); 
+	int direction = sign(steeringAngle); 
 	// make sure that it is within the correct bounds
 	if (abs(steeringAngle) > MAX_ANGLE_DEG){
-		if(direction == Left){
+		if(direction == -1){
 			steeringAngle = -MAX_ANGLE_DEG;
 		} else{
 			steeringAngle = MAX_ANGLE_DEG;
@@ -104,8 +116,18 @@ void set_steering_deg(int16_t steeringAngle){
 	* 	A 2.0ms pulse says to turn 90o in the clockwise direction	 */
 	// FUTURE maybe don't do a floating point multiply in the future
 	double servoDC= 1 +  (direction * steeringAngle * oneDegDC);
-	
+
 	set_servo_DC(servoDC);
 
 }
 	
+
+int main(void){
+	servo_init();
+	while(1){
+		for(int i=-60;i<61;i+=15){
+			set_steering_deg(i);
+			delay(5);
+		}
+	}
+}
