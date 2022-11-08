@@ -12,6 +12,8 @@
 #include "msp.h"
 #include "TimerA.h"
 
+#define MAX_SPEED 	(60)
+
 /**
  * @brief define how the RPi motor driver shield maps to the MSP432P4111
  * @note TA0.1 -> P2.4 ->	M1A 
@@ -23,6 +25,18 @@
  * @note P3.6 ->	M1EN
  * @note P3.7 ->	M2EN
  */
+
+
+/**
+ * @brief stop all of the DC motors by setting their duty cycles to zero
+ * 
+ */
+void stop_DC_motors(void){
+	TIMER_A0_PWM_DutyCycle(0.0,1);
+	TIMER_A0_PWM_DutyCycle(0.0,2);
+	TIMER_A0_PWM_DutyCycle(0.0,3);
+	TIMER_A0_PWM_DutyCycle(0.0,4);
+}
 
 
 /**
@@ -97,59 +111,83 @@ void DC_motors_disable(void){
 }
 
 
-int main(void) {
-
-
-	
-	
-
-
-	//Part 2 - UNCOMMENT THIS
-	for(;;)  //loop forever
-	{
-		// uint16_t dc = 0;
-		// uint16_t freq = 10000; // Frequency = 10 kHz 
-		// uint16_t dir = 0;
-		// char c = 48;
-		int i=0;
-		int waitNo = 1; //delay in the for loop 
-
-		// 0 to 100% duty cycle in forward direction
-		for (i=0; i<100; i++) {
-		    // INSERT CODE HERE
-			TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward left motor
-			TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward right motor
-			delay(waitNo);
-		}
-		
-		// 100% down to 0% duty cycle in the forward direction
-		for (i=100; i>=0; i--) {
-		    // INSERT CODE HERE
-			TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward right motor
-			TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward left motor
-			delay(waitNo);
-		}
-		
-		// 0 to 100% duty cycle in reverse direction
-		for (i=0; i<100; i++) {
-		    // INSERT CODE HERE
-			TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
-			TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
-			  
-			delay(waitNo);
-		}
-		
-		// 100% down to 0% duty cycle in the reverse direction
-		for (i=100; i>=0; i--) {
-		    // INSERT CODE HERE
-			TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
-			TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
-			delay(waitNo);
-		}
-
+/**
+ * @brief takes in a speed value and makes sure its not higher than the max
+ * 
+ * @param speed
+ * @return double  
+ */
+double bound_speed(double speed){
+	if (speed > MAX_SPEED){
+		return MAX_SPEED;
+	} else{
+		return speed;
 	}
-	return 0;
 }
+
+
+/**
+ * @brief moves the left motor as determined by the speed and direction params
+ * 
+ * @param speed a number from 1 to 100 that selects motor speed
+ * @param direction 0 for forward, 1 for reverse
+ */
+void left_motor_move(double speed, int direction){
+	speed = bound_speed(speed);
+	int highPin; //pin to have non-zero PWM value on
+	int lowPin; //pin to have zero PWM duty cycle on
+	if (direction == 0){
+		// if direction is zero we go forward
+		lowPin = 2;
+		highPin = 1;
+	}else{
+		// we go backward
+		lowPin = 1;
+		highPin = 2;
+	}
+	// set the PWM stuff
+	TIMER_A0_PWM_DutyCycle(0.01*speed, highPin); //Forward left motor
+	TIMER_A0_PWM_DutyCycle(0.0, lowPin); //Forward right motor
+}
+
+
+/**
+ * @brief moves the right motor as determined by the speed and direction params
+ * 
+ * @param speed a number from 1 to 100 that selects motor speed
+ * @param direction 0 for forward, 1 for reverse
+ */
+void right_motor_move(double speed, int direction){
+	speed = bound_speed(speed);
+	int highPin; //pin to have non-zero PWM value on
+	int lowPin; //pin to have zero PWM duty cycle on
+	if (direction == 0){
+		// if direction is zero we go forward
+		lowPin = 4;
+		highPin = 3;
+	}else{
+		// we go backward
+		lowPin = 3;
+		highPin = 4;
+	}
+	// set the PWM stuff
+	TIMER_A0_PWM_DutyCycle(0.01*speed, highPin); //Forward left motor
+	TIMER_A0_PWM_DutyCycle(0.0, lowPin); //Forward right motor
+}
+
+
+/**
+ * @brief set both motors to move in same direction and speed
+ * 
+ * @param speed a value between 1 and 100 (or the max speed) to set the motor
+ * @param direction 0 for forward, 1 for reverse
+ */
+void motors_move(double speed, int direction){
+	right_motor_move(speed,direction);
+	left_motor_move(speed,direction);
+}
+
+
 
 /**
  * Waits for a delay (in milliseconds)
@@ -165,12 +203,60 @@ void delay(int del){
 
 
 /**
- * @brief main function for testing the motors
+ * @brief main function to test the implementation of motor code
+ * @note should be commented out or removed in the actual code that gets run
  * 
- * @return int 
+ * @return int - have to for main function. never actually returned. 
  */
 int main(void){
-	dc_motors_init();
+	DC_motors_init();
+	DC_motors_enable();
+
+	// for(;;)  //loop forever
+	// {
+
+//	int i=0;
+//	int waitNo = 1; //delay in the for loop in ms
+
+	motors_move(40.0,0);
+	delay(100); // wait
+	stop_DC_motors();
+
+	// // 0 to 100% duty cycle in forward direction
+	// for (i=0; i<MAX_SPEED; i+=5) {
+	// 		// INSERT CODE HERE
+		
+	// 	delay(waitNo);
+	// }
+		
+		// // 100% down to 0% duty cycle in the forward direction
+		// for (i=100; i>=0; i--) {
+		//     // INSERT CODE HERE
+		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward right motor
+		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward left motor
+		// 	delay(waitNo);
+		// }
+		
+		// // 0 to 100% duty cycle in reverse direction
+		// for (i=0; i<100; i++) {
+		//     // INSERT CODE HERE
+		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
+		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
+			  
+		// 	delay(waitNo);
+		// }
+		
+		// // 100% down to 0% duty cycle in the reverse direction
+		// for (i=100; i>=0; i--) {
+		//     // INSERT CODE HERE
+		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
+		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
+		// 	delay(waitNo);
+		// }
+
+	// }
+	return 0;	// NOTE unreachable
+
 
 
 }
