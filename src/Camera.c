@@ -1,12 +1,15 @@
-/*
-* Rochester Institute of Technology
-* Department of Computer Engineering
-* CMPE 460  Interfacing Digital Electronics
-* LJBeato
-* 1/14/2021
-*
-* Filename: main_timer_template.c
-*/
+/**
+ * @file Camera.c
+ * @author Erica Coles
+ * @author Atticus Russell 
+ * @brief provides functionality to use linescan camera with MSP432 uC for autonomous car on track.
+ * @version 0.1
+ * @date November 2022
+ * @class CMPE-460 Interface and Digital Electronics
+ * 
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
