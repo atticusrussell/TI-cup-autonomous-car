@@ -18,17 +18,8 @@
 #include "ServoMotor.h"
 
 
-
-// // which way to turn but encoded as ints
-// enum turnDir{
-// 	Left = -1,
-// 	Right = 1
-// } direction;
-
-
 //int servoPeriod;
 double oneDegDC = 0.5/SERVO_MAX_ANGLE_DEG;
-
 
 
 /**
@@ -46,30 +37,30 @@ void delay(int del){
 	
 
 
-	/* start puzzling comments from prior lab */
-	//initialize cycles for period
-	// uint32_t clkFrq = 3000000; // 3 MHz
-	// uint16_t desiredServoFrq = 50; // 50 Hz
-	// uint16_t period = clkFrq / desiredServoFrq;
-	/* end puzzling comments from prior lab */
-	// TODO  i think that servo is pin 5.6 on the board
-	/**
-	 * notes from slides about NXP car servo
-	 * microcontrollers tell the controller boards inside servos where to
-	 *		turn by inputting pulse signals.
-		*			• These signals are called pulse-proportional modulation.
-		*			– The width of the pulse is what drives the controller board.
-		*			– For example, typically a 1 - 2m pulse out of a 20ms period  
-		*				is used in a continuous fashion
-		* 	A 1.5ms pulse says do not turn at all
-		* 	A 1.0ms pulse says to turn 90o	counter-clockwise
-		* 	A 2.0ms pulse says to turn 90o in the clockwise direction
-		*/
+ 
+/**
+ * notes from slides about NXP car servo
+ * microcontrollers tell the controller boards inside servos where to
+ *		turn by inputting pulse signals.
+ *			• These signals are called pulse-proportional modulation.
+ *			– The width of the pulse is what drives the controller board.
+ *			– For example, typically a 1 - 2m pulse out of a 20ms period  
+ *				is used in a continuous fashion
+ * 	A 1.5ms pulse says do not turn at all
+ *   	A 1.0ms pulse says to turn 90o	counter-clockwise
+ *  	A 2.0ms pulse says to turn 90o in the clockwise direction
+ */
+
+
+/**
+ * @brief initialize the servo to be controlled using Timer A2
+ * 
+ */
 void servo_init(void){
 	uint16_t timerPeriod = SERVO_CLK/SERVO_PWM_FREQ_HZ;
 	double servoStraightDC = 1.5/SERVO_PWM_PERIOD_MS;
 	
-	// TODO start with servo straight -> initialize to 1.5 ms
+	// start with servo straight -> initialize to 1.5 ms
 	TIMER_A2_PWM_Init(timerPeriod, servoStraightDC, 1); 
 }
 
@@ -117,24 +108,19 @@ void set_steering_deg(int16_t steeringAngle){
 	* 	A 2.0ms pulse says to turn 90o in the clockwise direction	 */
 	// FUTURE maybe don't do a floating point multiply in the future
 	// 1.5 + ( +-1)*(value from 60 to 60)*(0.5/60)
-	double servoPulse= 1.5 +  (direction * steeringAngle * oneDegDC);
-
+	double servoPulse= 1.5 +  (steeringAngle * oneDegDC);
 	set_servo_pulse(servoPulse);
-
 }
 	
 
 int main(void){
 	servo_init();
-	set_steering_deg(-60);
-	delay(100);
-	set_steering_deg(60);
-	delay(100);
 	while(1){
-		for(int i=-60;i<61;i+=15){
-			set_steering_deg(i);
-			delay(100);
-		}
+		set_steering_deg(-60);
+		delay(100);
+		set_steering_deg(60);
+		delay(100);
+		set_steering_deg(0);
+		delay(100);
 	}
-	// return 0; // unreachable
 }
