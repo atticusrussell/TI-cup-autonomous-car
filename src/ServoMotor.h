@@ -1,5 +1,5 @@
 /**
- * @file ServoMotor.c
+ * @file ServoMotor.h
  * @authors Erica Coles, Atticus Russell
  * @brief header file to help interface with servo steering IDE msp432 car
  * @version 0.1
