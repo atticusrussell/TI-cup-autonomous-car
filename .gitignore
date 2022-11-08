@@ -1,3 +1,5 @@
+# ignore everything else
+*
 # except the following
 # don't ignore this actual file
 !.gitignore
@@ -16,5 +18,4 @@
 !RTE/Device/MSP432P4111/system_msp432p4111.c
 !RTE/Device/MSP432P4111/startup_msp432p4111_uvision.s
 
-# ignore everything else
-*
+
