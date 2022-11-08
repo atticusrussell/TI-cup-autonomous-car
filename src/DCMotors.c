@@ -76,6 +76,15 @@ void DC_motors_init(void){
 	TIMER_A0_PWM_Init(motor_period, initial_DC, 4);
 }
 
+/**
+ * @brief enable motors 1 and 2
+ * 
+ */
+void DC_motors_enable(void){
+	P3->OUT |= BIT6;	// Enable Motor 1
+	P3->OUT |= BIT7;	// Enable Motor 2
+}
+
 
 
 
