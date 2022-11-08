@@ -21,6 +21,12 @@
 #include "ControlPins.h"
 
 
+#define LineThreshold 1000//need to determine this value
+
+int count = 1;
+int trace[1][128] = 0; //stored values for raw input
+int bintrace[1][128] = 0; //stored values for edge detection
+int smoothtrace[1][128] = 0; //stored values for 5-pt averager
 
 
 ///////////////////////////////////////////////////////
@@ -82,6 +88,74 @@ void INIT_Camera(void)
 	ADC0_InitSWTriggerCh6();
 }
 
+/* [] CameraValues (){
+	//CAMERA_AVG => an integer value for how long the averaging length will occur
+	//gfpLineAverage => global floating point array of camera center line values
+	//fpLinePos => returned from read camera this is the center line position
+	//ReadCamera() => is the read camera function call returns a floating point value of fpLinePos
+
+	// this will shift the values up and throw away the oldest value
+	// then add a new reading
+	for (i=CAMERA_AVG;i>0;i—)
+		{
+		gfpLineAverage[i]=gfpLineAverage[i-1];
+		}
+	// if no line was detected the previous camera value will be passed on
+	if (fpLinePos=ReadCamera())
+		{
+		gfpLineAverage[0]= fpLinePos;
+		}
+} */
+
+
+/// @brief Detects if the car is on or off the track
+/// @param maxCamVal maximum value of camera data 
+/// @return True if the car is off track, otherwise false if car is on track
+BOOLEAN trackDetection(uint16_t maxCamVal){
+	maxCamVal = line[128];
+	if (maxCamVal > LineThreshold){
+		uart0_put("Car is off track");
+		return TRUE; //car is off the track
+
+	}
+	uart0_put("Car is on track");
+	return FALSE; //car is on track
+}
+
+uint8_t centerTrack(uint16_t* smoothtrace, uint16_t* lineData){
+	uint8_t rightLineVal = 0;
+	uint8_t leftLineVal = 0;
+	uint8_t i ;
+	uint8_t centerLineVal;
+
+	for(i = 64; i < 127; i++) {
+		if(lineData[i] == 0){
+			rightLineVal = i;
+			break;
+		}
+	}
+
+	for(i = 64; i >= 0; i--) {
+		if(lineData[i] == 0){
+			leftLineVal = i;
+			break;
+		}
+	}
+
+	// return the center value of the track
+	centerLineVal = leftLineVal + ((rightLineVal - leftLineVal)/2);
+	return centerLineVal;
+}
+
+int movAvg(uint16_t* lineData, uint16_t* smoothTrace){
+	uint16_t mov_avg = 0;
+	int j = 0;
+
+	for(j = 0; j < 128; j++){
+		mov_avg = (lineData[j+3] + lineData[j+2] + lineData[j+1] + lineData[j] + lineData[j-1])/5;
+		smoothTrace[j] = mov_avg;
+	}
+}
 
 /////////////////////////////////////////////////////
 //
