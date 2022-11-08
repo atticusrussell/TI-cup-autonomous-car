@@ -10,6 +10,7 @@
 #include "msp.h"
 #include "uart.h"
 #include "Common.h"
+#include "ServoMotor.h"
 
 // constant params to tweak as needed
 // maximum motor duty cycle
@@ -38,7 +39,7 @@ enum motorDir{
 };
 
 // angle of wheels in degrees with 0 = straight, + right - left. used for servo
-signed int turnAngle;
+int16_t turnAngle;
 
 // if edge has been detected near car (or maybe just at all - tbd )
 BOOLEAN edgeNear;
@@ -63,9 +64,8 @@ onTrack = 1;
 
 // [x] implement logic conditionals
 // [x] call update functions
-// [ ] create abstract turning functions in this file
-// [ ] refine existing servo code with callable functions
-// [ ] test with hardware the servo function
+// [x] refine existing servo code with callable functions
+// [x] test with hardware the servo function
 // [ ] create abstract DC motor speed function in this file
 // [ ] implement motor speed and dir funcs in existing file
 // [ ] test in hardware the motor function
@@ -78,14 +78,6 @@ onTrack = 1;
 
 
 
-/**
- * @brief Call servo file to set direction of wheels
- * 
- * @param angle est. angle of wheels in degrees. 0 = straight, + right -left.
- */
-void set_steering(signed int angle){
-	// TODO call the servo functions in some smart way
-}
 
 
 /**
@@ -104,8 +96,8 @@ void delay(int del){
 
 // NOTE we want to abstract away the hardware details in main
 int main(void){
-	// TODO call initialization function for servo
-
+	// call initialization function for servo
+	servo_init();
 	// TODO call initialization function for motor
 
 	// TODO call initialization function for camera
@@ -143,7 +135,7 @@ int main(void){
 		/* call the code -> real world update functions */
 		set_motor_speed(motorSpeed);
 		set_motor_dir(motorDir);
-		set_steering(turnAngle);
+		set_steering_deg(turnAngle);
 
 		/* update functions map from real world -> code */
 		edgeNear = get_edge_near();
