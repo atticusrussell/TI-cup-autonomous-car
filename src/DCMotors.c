@@ -1,61 +1,44 @@
-/*
- * Main module for testing the PWM Code for the K64F
+/**
+ * @file DCMotors.c
+ * @authors Erica Coles, Atticus Russell
+ * @brief file to interface motors with IDE msp432P4111 car project
+ * @note trying to make it modular. Customized for RPi Motor Driver board.
+ * @version 0.1
+ * @date November 2022
  * 
- * Author:  
- * Created:  
- * Modified: Carson Clarke-Magrab <ctc7359@rit.edu> 
- * LJBeato
- * 2021
+ * 
  */
 
 #include "msp.h"
-#include "uart.h"
 #include "TimerA.h"
-
-// #define PART1 // comment out for part 2
-
 
 
 /**
- * Waits for a delay (in milliseconds)
+ * @brief initialize left and right DC motor to be PWM controlled
  * 
- * del - The delay in milliseconds
  */
-void delay(int del){
-	volatile int i;
-	for (i=0; i<del*50000; i++){
-		;// Do nothing
-	}
+void DC_motors_init(void){
+	// configure port multiplexors to SEL0=1, SEL1=0
+	// configure port multiplexor P2.4 so that it is TA0.CCI2A/TA0.1
+	P2 -> SEL0 |= BIT4; 
+	P2 -> SEL1 &= ~BIT4; 
+	// configure port multiplexer P2.7 so that it is TA0.CCI4A/TA0.4
+	P2 -> SEL0 |= BIT7; 
+	P2 -> SEL1 &= ~BIT7;
 }
 
-int main(void) {
-	// Initialize UART and PWM
-	uart0_init();
-	P2 -> SEL0 |= BIT4; //PWM generated on P2.4
-	P2 -> SEL1 |= BIT4; //PWM generated on P2.4
-	P2 -> SEL0 |= BIT7; //PWM generated on P2.7
-	P2 -> SEL1 |= BIT7; //PWM generated on P2.7
 
-	// Print welcome over serial
-	uart0_put("Running... \n\r");
+int main(void) {
+
+
 	
 	// Part 1 - UNCOMMENT THIS
 	// Generate 20% duty cycle at 10kHz
+	// initialize the // TODO left? motor at 20%?
 	TIMER_A0_PWM_Init(300, 0.2, 4);
+	// initialize the // TODO right? motor at 0% DC. 
 	TIMER_A0_PWM_Init(300, 0.0, 1);
 
-#ifdef PART1
-
-	// INSERT CODE HERE
-	//Initializing to 300 because 3 mhz / 10 khz = 300 cycles
-	
-	TIMER_A0_PWM_DutyCycle(0.2, 4);
-	TIMER_A2_PWM_DutyCycle(0.2, 1);
-	
-	
-	for(;;) ;  //then loop forever
-
-#else 
 
 	//Part 2 - UNCOMMENT THIS
 	for(;;)  //loop forever
@@ -101,9 +84,30 @@ int main(void) {
 		}
 
 	}
-#endif
 	return 0;
 }
 
+/**
+ * Waits for a delay (in milliseconds)
+ * 
+ * del - The delay in milliseconds
+ */
+void delay(int del){
+	volatile int i;
+	for (i=0; i<del*50000; i++){
+		;// Do nothing
+	}
+}
 
+
+/**
+ * @brief main function for testing the motors
+ * 
+ * @return int 
+ */
+int main(void){
+	dc_motors_init();
+
+
+}
 
