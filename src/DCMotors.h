@@ -20,10 +20,16 @@
 #define NORMAL_SPEED 	(35)
 // slower motor duty cycle for turns
 #define TURN_SPEED 		(5)
-// turn increments (tuning how hard we turn) - unitless rn
-#define TURN_INCREMENT 	(3)
 
 // TODO function prototypes
+void stop_DC_motors(void);
+void DC_motors_init(void);
+void DC_motors_enable(void);
+void DC_motors_disable(void);
+double bound_speed(double speed);
+void left_motor_move(double speed, int direction);
+void right_motor_move(double speed, int direction);
+void motors_move(double speed, int direction);
 
 
 #endif

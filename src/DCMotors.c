@@ -187,7 +187,7 @@ void motors_move(double speed, int direction){
 }
 
 
-
+// NOTE comment out from here down if calling from main file for testing
 /**
  * Waits for a delay (in milliseconds)
  * 
