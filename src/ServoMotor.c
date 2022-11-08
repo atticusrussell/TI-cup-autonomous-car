@@ -18,14 +18,9 @@
 #include "ServoMotor.h"
 
 
-//int servoPeriod;
 double oneDegDC = 0.5/SERVO_MAX_ANGLE_DEG;
 
 
-	
-
-
- 
 /**
  * notes from slides about NXP car servo
  * microcontrollers tell the controller boards inside servos where to
@@ -101,29 +96,29 @@ void set_steering_deg(int16_t steeringAngle){
 }
 	
 
-// NOTE comment out from here to end of tile if not testing servo alone.
-/**
- * @brief waits for a delay (in milliseconds)
- * 
- * @param del - The delay in milliseconds
- * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
- */
-void delay(int del){
-	volatile int i;
-	for (i=0; i<del*50000; i++){
-		;// Do nothing
-	}
-}
+// // NOTE comment out from here to end of tile if not testing servo alone.
+// /**
+//  * @brief waits for a delay (in milliseconds)
+//  * 
+//  * @param del - The delay in milliseconds
+//  * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
+//  */
+// void delay(int del){
+// 	volatile int i;
+// 	for (i=0; i<del*50000; i++){
+// 		;// Do nothing
+// 	}
+// }
 
 
-int main(void){
-	servo_init();
-	while(1){
-		set_steering_deg(-60);
-		delay(100);
-		set_steering_deg(60);
-		delay(100);
-		set_steering_deg(0);
-		delay(100);
-	}
-}
+// int main(void){
+// 	servo_init();
+// 	while(1){
+// 		set_steering_deg(-60);
+// 		delay(100);
+// 		set_steering_deg(60);
+// 		delay(100);
+// 		set_steering_deg(0);
+// 		delay(100);
+// 	}
+// }
