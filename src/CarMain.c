@@ -66,9 +66,9 @@ onTrack = 1;
 // [x] call update functions
 // [x] refine existing servo code with callable functions
 // [x] test with hardware the servo function
-// [ ] create abstract DC motor speed function in this file
-// [ ] implement motor speed and dir funcs in existing file
-// [ ] test in hardware the motor function
+// [x] create abstract DC motor speed function in this file
+// [x] implement motor speed and dir funcs in existing file
+// [x] test in hardware the motor function
 // [ ] test camera functionality/ look at the MATLAB plot of the track lab5 code
 // [ ] create function to use the camera to see if on the track
 // [ ] create specific carpet detection function in some file (milestone 1)
