@@ -1,14 +1,14 @@
 {
-  "configurations": [
-    {
-      "name": "Target 1",
-      "includePath": [
-        "C:/CETools/Keil_v5/ARM/ARMCC/include",
-        "C:/CETools/Keil_v5/ARM/ARMCLANG/include",
-		"C:/Users/attic/AppData/Local/Arm/Packs/TexasInstruments/MSP432P4xx_DFP/3.2.6/Device/Include",
-		"C:/Users/attic/AppData/Local/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include"
-      ],
-	   "forcedInclude": [
+    "configurations": [
+        {
+            "name": "Target 1",
+            "includePath": [
+                "C:/Keil_v5/ARM/ARMCC/include",
+                "C:/Keil_v5/ARM/ARMCLANG/include",
+                "C:/Users/${env:USERNAME}/AppData/Local/Arm/Packs/TexasInstruments/MSP432P4xx_DFP/3.2.6/Device/Include",
+                "C:/Users/${env:USERNAME}/AppData/Local/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include"
+            ],
+            "forcedInclude": [
                 "C:\\CEtools\\Keil_v5\\ARM\\ARMCC\\include\\stdint.h"
             ],
 		"cStandard": "c99",
