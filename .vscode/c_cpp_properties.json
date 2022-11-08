@@ -9,7 +9,7 @@
                 "C:/Users/${env:USERNAME}/AppData/Local/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include"
             ],
             "forcedInclude": [
-                "C:\\CEtools\\Keil_v5\\ARM\\ARMCC\\include\\stdint.h"
+                "C:/Keil_v5/ARM/ARMCC/include/stdint.h"
             ],
 		"cStandard": "c99",
         "defines": [
