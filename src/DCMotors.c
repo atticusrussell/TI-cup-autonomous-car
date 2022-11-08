@@ -12,32 +12,74 @@
 #include "msp.h"
 #include "TimerA.h"
 
+/**
+ * @brief define how the RPi motor driver shield maps to the MSP432P4111
+ * @note TA0.1 -> P2.4 ->	M1A 
+ * @note TA0.2 -> P2.5 ->	M1B 
+ * 
+ * @note TA0.3 -> P2.6 ->	M2A 
+ * @note TA0.4 -> P2.7 ->	M2B 
+ * 
+ * @note P3.6 ->	M1EN
+ * @note P3.7 ->	M2EN
+ */
+
 
 /**
  * @brief initialize left and right DC motor to be PWM controlled
  * 
  */
 void DC_motors_init(void){
-	// configure port multiplexors to SEL0=1, SEL1=0
-	// configure port multiplexor P2.4 so that it is TA0.CCI2A/TA0.1
+	
+	/* INITIALIZE ALL OF THE PINS*/
+	// initialize motor enable pins as GPIO (SEL0=0, SEL1=0)
+	// P3.6 ->	M1EN (GPIO)
+	P3 -> SEL0 &= ~BIT6;
+	P3 -> SEL1 &= ~BIT6;
+	// P3.7 ->	M2EN (GPIO)
+	P3 -> SEL0 &= ~BIT7;
+	P3 -> SEL1 &= ~BIT7;
+	// set the enable pins as outputs
+	P3	-> DIR |= BIT6; 
+	P3	-> DIR |= BIT7;
+	// set the enable pins to high drive strength
+	P3	-> DS |= BIT6;
+	P3	-> DS |= BIT7;
+
+
+	// configure motor port multiplexers to SEL0=1, SEL1=0
+	// configure M1A port multiplexor P2.4 so that it is controlled by TA0.1
 	P2 -> SEL0 |= BIT4; 
 	P2 -> SEL1 &= ~BIT4; 
-	// configure port multiplexer P2.7 so that it is TA0.CCI4A/TA0.4
+	// configure M1B port multiplexer P2.5 so that it is controlled by TA0.2
+	P2 -> SEL0 |= BIT5; 
+	P2 -> SEL1 &= ~BIT5; 
+	// configure M2A port multiplexor P2.6 so that it is controlled by TA0.3
+	P2 -> SEL0 |= BIT6; 
+	P2 -> SEL1 &= ~BIT6; 
+	// configure M2B port multiplexer P2.7 so that it is controlled by TA0.4
 	P2 -> SEL0 |= BIT7; 
-	P2 -> SEL1 &= ~BIT7;
+	P2 -> SEL1 &= ~BIT7; 
+
+	/* INITIALIZE ALL OF THE TIMER driven PWM outputs */
+	// initialize PWM using Timer A0
+	// Initialize at 10kHz if the frequency is 3000000
+	// Generate 0% duty cycle at 10kHz
+	float init_DC = 0.0;
+	// initialize the // TODO left? motor at 20%?
+	TIMER_A0_PWM_Init(300, 0.2, 4);
+	// initialize the // TODO right? motor at 0% DC. 
+	TIMER_A0_PWM_Init(300, 0.0, 1);
 }
+
+
 
 
 int main(void) {
 
 
 	
-	// Part 1 - UNCOMMENT THIS
-	// Generate 20% duty cycle at 10kHz
-	// initialize the // TODO left? motor at 20%?
-	TIMER_A0_PWM_Init(300, 0.2, 4);
-	// initialize the // TODO right? motor at 0% DC. 
-	TIMER_A0_PWM_Init(300, 0.0, 1);
+	
 
 
 	//Part 2 - UNCOMMENT THIS
