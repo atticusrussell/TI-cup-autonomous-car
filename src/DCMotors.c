@@ -5,14 +5,13 @@
  * @note trying to make it modular. Customized for RPi Motor Driver board.
  * @version 0.1
  * @date November 2022
- * 
+ * 	
  * 
  */
 
 #include "msp.h"
 #include "TimerA.h"
-
-#define MAX_SPEED 	(60)
+#include	"CarDefines.h"
 
 /**
  * @brief define how the RPi motor driver shield maps to the MSP432P4111

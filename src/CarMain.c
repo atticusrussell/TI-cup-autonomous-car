@@ -11,20 +11,11 @@
 #include "uart.h"
 #include "Common.h"
 #include "ServoMotor.h"
-
-// constant params to tweak as needed
-// maximum motor duty cycle
-#define MOTOR_MAX_SPEED (30)
-// normal forward motor duty cycle
-#define NORMAL_SPEED 	(10)
-// slower motor duty cycle for turns
-#define TURN_SPEED 		(5)
-// turn increments (tuning how hard we turn) - unitless rn
-#define TURN_INCREMENT (3)
+#include "CarDefines.h"
 
 
-// FUTURE  see if we want to run processor at faster 48 MHz clk for 
-//		responsiveness
+
+
 // FUTURE implement error handling
 
 
@@ -68,7 +59,7 @@ onTrack = 1;
 // [x] test with hardware the servo function
 // [x] create abstract DC motor speed function in this file
 // [x] implement motor speed and dir funcs in existing file
-// [x] test in hardware the motor function
+// [ ] test in hardware the motor function
 // [ ] test camera functionality/ look at the MATLAB plot of the track lab5 code
 // [ ] create function to use the camera to see if on the track
 // [ ] create specific carpet detection function in some file (milestone 1)
