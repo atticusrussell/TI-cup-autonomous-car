@@ -26,7 +26,7 @@
 
 
 /**
- * @brief initialize left and right DC motor to be PWM controlled
+ * @brief initialize left and right DC motor to be PWM controlled at 10 kHz.
  * 
  */
 void DC_motors_init(void){
@@ -61,15 +61,19 @@ void DC_motors_init(void){
 	P2 -> SEL0 |= BIT7; 
 	P2 -> SEL1 &= ~BIT7; 
 
-	/* INITIALIZE ALL OF THE TIMER driven PWM outputs */
-	// initialize PWM using Timer A0
-	// Initialize at 10kHz if the frequency is 3000000
-	// Generate 0% duty cycle at 10kHz
-	float init_DC = 0.0;
-	// initialize the // TODO left? motor at 20%?
-	TIMER_A0_PWM_Init(300, 0.2, 4);
-	// initialize the // TODO right? motor at 0% DC. 
-	TIMER_A0_PWM_Init(300, 0.0, 1);
+
+	/* INITIALIZE ALL OF THE TIMER driven PWM outputs on Timer A0 */
+	// desired motor frequency in Hz
+	int motor_freq_Hz = 10000; // initialized to 10 kHz like in Lab 6
+	// calculate the period for the current frequency
+	int motor_period = HIGH_CLOCK_SPEED/motor_freq_Hz;
+	// initialize to zero percent duty cycle
+	float initial_DC = 0.0; 
+	// initialize each of the motor outputs
+	TIMER_A0_PWM_Init(motor_period, initial_DC, 1);
+	TIMER_A0_PWM_Init(motor_period, initial_DC, 2);
+	TIMER_A0_PWM_Init(motor_period, initial_DC, 3);
+	TIMER_A0_PWM_Init(motor_period, initial_DC, 4);
 }
 
 
