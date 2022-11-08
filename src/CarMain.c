@@ -34,8 +34,8 @@ int motorSpeed;
 
 // the direction of the motor -> pin to write to i think
 enum motorDir{
-	FWD = 1,
-	REV = 0
+	FWD = 0,
+	REV = 1
 };
 
 // angle of wheels in degrees with 0 = straight, + right - left. used for servo
