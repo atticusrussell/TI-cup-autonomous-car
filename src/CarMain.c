@@ -11,9 +11,12 @@
 #include "uart.h"
 #include "Common.h"
 #include "ServoMotor.h"
-#include "CarDefines.h"
+#include "DCMotors.h"
 
+#define 	BASIC_TESTING
 
+// turn increments (tuning how hard we turn) - unitless rn
+#define TURN_INCREMENT 	(3)
 
 
 // FUTURE implement error handling
@@ -59,6 +62,7 @@ onTrack = 1;
 // [x] test with hardware the servo function
 // [x] create abstract DC motor speed function in this file
 // [x] implement motor speed and dir funcs in existing file
+// [ ] make DC motor header file
 // [ ] test in hardware the motor function
 // [ ] test camera functionality/ look at the MATLAB plot of the track lab5 code
 // [ ] create function to use the camera to see if on the track
@@ -95,6 +99,19 @@ int main(void){
 
 	// infinite loop to contain logic
 	while(1){
+
+		#ifdef BASIC_TESTING
+		// TODO write some basic test functionality here
+
+
+
+
+		#else // run the actual code
+
+
+
+
+
 		// if on the track
 		if(onTrack){
 			if(edgeNear){
@@ -134,6 +151,8 @@ int main(void){
 			edgeDir = get_edge_dir();
 		}
 		onTrack = get_on_track();
+
+		#endif
 
 	}
 	
