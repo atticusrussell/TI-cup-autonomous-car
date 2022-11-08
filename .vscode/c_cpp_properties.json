@@ -13,7 +13,7 @@
             ],
 		"cStandard": "c99",
         "defines": [
-        "__MSP432P401R__",
+        "__MSP432P4111__",
         "__align(x)=",
         "__ALIGNOF__(x)=",
         "__alignof__(x)=",
