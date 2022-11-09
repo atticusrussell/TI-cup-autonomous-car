@@ -29,6 +29,8 @@
  * @note CLK Pin will be P5.4 A1
  * 
  */
+extern uint16_t line[128]; 
+extern BOOLEAN g_sendData; 
  
 
 /**

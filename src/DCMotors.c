@@ -187,76 +187,76 @@ void motors_move(double speed, int direction){
 }
 
 
-// NOTE comment out from here down if calling from main file for testing
-/**
- * Waits for a delay (in milliseconds)
- * 
- * del - The delay in milliseconds
- */
-void delay(int del){
-	volatile int i;
-	for (i=0; i<del*50000; i++){
-		;// Do nothing
-	}
-}
+//// NOTE comment out from here down if calling from main file for testing
+///**
+// * Waits for a delay (in milliseconds)
+// * 
+// * del - The delay in milliseconds
+// */
+//void delay(int del){
+//	volatile int i;
+//	for (i=0; i<del*50000; i++){
+//		;// Do nothing
+//	}
+//}
 
 
-/**
- * @brief main function to test the implementation of motor code
- * @note should be commented out or removed in the actual code that gets run
- * 
- * @return int - have to for main function. never actually returned. 
- */
-int main(void){
-	DC_motors_init();
-	DC_motors_enable();
+///**
+// * @brief main function to test the implementation of motor code
+// * @note should be commented out or removed in the actual code that gets run
+// * 
+// * @return int - have to for main function. never actually returned. 
+// */
+//int main(void){
+//	DC_motors_init();
+//	DC_motors_enable();
 
-	// for(;;)  //loop forever
-	// {
+//	// for(;;)  //loop forever
+//	// {
 
-//	int i=0;
-//	int waitNo = 1; //delay in the for loop in ms
+////	int i=0;
+////	int waitNo = 1; //delay in the for loop in ms
 
-	motors_move(40.0,0);
-	delay(100); // wait
-	stop_DC_motors();
+//	motors_move(40.0,0);
+//	delay(100); // wait
+//	stop_DC_motors();
 
-	// // 0 to 100% duty cycle in forward direction
-	// for (i=0; i<MAX_SPEED; i+=5) {
-	// 		// INSERT CODE HERE
-		
-	// 	delay(waitNo);
-	// }
-		
-		// // 100% down to 0% duty cycle in the forward direction
-		// for (i=100; i>=0; i--) {
-		//     // INSERT CODE HERE
-		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward right motor
-		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward left motor
-		// 	delay(waitNo);
-		// }
-		
-		// // 0 to 100% duty cycle in reverse direction
-		// for (i=0; i<100; i++) {
-		//     // INSERT CODE HERE
-		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
-		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
-			  
-		// 	delay(waitNo);
-		// }
-		
-		// // 100% down to 0% duty cycle in the reverse direction
-		// for (i=100; i>=0; i--) {
-		//     // INSERT CODE HERE
-		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
-		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
-		// 	delay(waitNo);
-		// }
+//	// // 0 to 100% duty cycle in forward direction
+//	// for (i=0; i<MAX_SPEED; i+=5) {
+//	// 		// INSERT CODE HERE
+//		
+//	// 	delay(waitNo);
+//	// }
+//		
+//		// // 100% down to 0% duty cycle in the forward direction
+//		// for (i=100; i>=0; i--) {
+//		//     // INSERT CODE HERE
+//		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 1); //Forward right motor
+//		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 4); //Forward left motor
+//		// 	delay(waitNo);
+//		// }
+//		
+//		// // 0 to 100% duty cycle in reverse direction
+//		// for (i=0; i<100; i++) {
+//		//     // INSERT CODE HERE
+//		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
+//		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
+//			  
+//		// 	delay(waitNo);
+//		// }
+//		
+//		// // 100% down to 0% duty cycle in the reverse direction
+//		// for (i=100; i>=0; i--) {
+//		//     // INSERT CODE HERE
+//		// 	TIMER_A0_PWM_DutyCycle(0.0*i, 1); //Reverse right motor
+//		// 	TIMER_A0_PWM_DutyCycle(0.01*i, 4); //Reverse left motor
+//		// 	delay(waitNo);
+//		// }
 
-	// }
-	return 0;	// NOTE unreachable
+//	// }
+//	return 0;	// NOTE unreachable
 
 
 
-}
+//}
 

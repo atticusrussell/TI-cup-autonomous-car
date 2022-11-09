@@ -15,6 +15,7 @@
 #include "CortexM.h"
 #include "Camera.h"
 #include	"LEDs.h"
+#include "ControlPins.h"
 
 #define 	BASIC_TESTING
 
@@ -27,12 +28,12 @@
 
 
 /* camera variables*/
-uint16_t rawLine[128];			// current array of raw camera data
+extern uint16_t line[128];			// current array of raw camera data
 uint16_t smoothLine[128];	// camera data filtered by smoothing
 uint8_t	trackCenterIndex;	// camera index of the center of the track
 uint16_t trackCenterValue;	// value of the camera at the center of the track
 BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
-BOOLEAN	g_sendData;			// if the camera is ready to send new data
+extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
 
 // number from 0 to 100 that will be converted into duty cycle for motor
@@ -59,12 +60,12 @@ signed int edgeDir;
 
 // FUTURE centralize delay function
 
-/* initialize state variables to starting values */
-motorDir = FWD;
-motorSpeed = NORMAL_SPEED;
-turnAngle = 0;
-edgeNear = 0;
-onTrack = 1;
+///* initialize state variables to starting values */
+//motorDir = FWD;
+//motorSpeed = NORMAL_SPEED;
+//turnAngle = 0;
+//edgeNear = 0;
+//onTrack = 1;
 
 
 // [x] implement logic conditionals
@@ -88,18 +89,18 @@ onTrack = 1;
 
 
 
-/**
- * @brief waits for a delay (in milliseconds)
- * 
- * @param del - The delay in milliseconds
- * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
- */
-void delay(int del){
-	volatile int i;
-	for (i=0; i<del*50000; i++){
-		;// Do nothing
-	}
-}
+///**
+// * @brief waits for a delay (in milliseconds)
+// * 
+// * @param del - The delay in milliseconds
+// * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
+// */
+//void delay(int del){
+//	volatile int i;
+//	for (i=0; i<del*50000; i++){
+//		;// Do nothing
+//	}
+//}
 
 
 
@@ -135,7 +136,7 @@ int main(void){
 		}
 
 
-		smooth_line(rawLine,smoothLine);
+		smooth_line(line,smoothLine);
 		trackCenterIndex = get_track_center(smoothLine);
 		trackCenterValue = smoothLine[trackCenterIndex];
 		carOnTrack = get_on_track(trackCenterValue);
@@ -204,5 +205,5 @@ int main(void){
 
 	}
 	
-	return 0;  // never reached due to infinite while loop
+	// return 0;  // never reached due to infinite while loop
 }

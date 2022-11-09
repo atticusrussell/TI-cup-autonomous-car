@@ -95,26 +95,26 @@ void set_steering_deg(int16_t steeringAngle){
 	set_servo_pulse(servoPulse);
 }
 
-void steering_alignment(uint16_t* smoothData){
-	double servo_pos;
-	int change; 
+//void steering_alignment(uint16_t* smoothData){
+//	double servo_pos;
+//	int change; 
 
-	for(int i = 0; i < 128; i++){
-		change = 64-smoothData[i]; 
+//	for(int i = 0; i < 128; i++){
+//		change = 64-smoothData[i]; 
 
-		// if car is on track then, the servo's position stays the same
-		if (onTrack(change) == TRUE){ 
-			servo_pos = change;
-		}
+//		// if car is on track then, the servo's position stays the same
+//		if (onTrack(change) == TRUE){ 
+//			servo_pos = change;
+//		}
 
-		// if off track, the servo position is readjusted
-		else{
-			servo_pos = CENTER_VAL + (((double)change/45.0) * CENTER_VAL);
-			TIMER_A2_PWM_DutyCycle(servo_pos, 1);
-		}
-	}
-	
-}
+//		// if off track, the servo position is readjusted
+//		else{
+//			servo_pos = CENTER_VAL + (((double)change/45.0) * CENTER_VAL);
+//			TIMER_A2_PWM_DutyCycle(servo_pos, 1);
+//		}
+//	}
+//	
+//}
 	
 
 // // NOTE comment out from here to end of tile if not testing servo alone.
