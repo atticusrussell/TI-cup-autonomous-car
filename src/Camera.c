@@ -11,16 +11,11 @@
  * 
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "msp.h"
-#include "leds.h"
-#include "Timer32.h"
-#include "CortexM.h"
+#include	<stdint.h>
 #include "Common.h"
 #include "ADC14.h"
 #include "ControlPins.h"
+#include "Camera.h"
 
 
 
