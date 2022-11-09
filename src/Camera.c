@@ -49,7 +49,7 @@ void INIT_Camera(void){
  * @param centerCamVal value at visual center of camera data 
  * @return True if the car is on track, otherwise false 
  */
-BOOLEAN onTrack(uint16_t maxCamVal){
+BOOLEAN get_on_track(uint16_t maxCamVal){
 	if (maxCamVal > TRACK_MIN_VAL){
 		return TRUE; //car is on the track
 	} else{
@@ -87,7 +87,7 @@ uint8_t get_track_center(uint16_t* smoothData){
  * @note based on the MATLAB code for processing the camera data in Lab5
  * 
  */
-void movAvg(uint16_t* rawData, uint16_t* smoothData){
+void smooth_line(uint16_t* rawData, uint16_t* smoothData){
 	uint16_t avg;
 
 	for(int j = 0; j < 128; j++){
