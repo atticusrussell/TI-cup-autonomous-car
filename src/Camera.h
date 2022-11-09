@@ -14,7 +14,7 @@
 #define _CAMERA_HEADER_FILE_
 
 // the minimum camera value that is considered to be on the tack
-#define TRACK_MIN_VAL	(8000)
+#define TRACK_MIN_VAL	(6000)
 
  /* Function prototypes */ 
 void INIT_Camera(void);
