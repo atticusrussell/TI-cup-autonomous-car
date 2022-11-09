@@ -17,7 +17,7 @@
 #include "TimerA.h"
 #include "ServoMotor.h"
 
-
+#define CENTER_VAL 0.075
 double oneDegDC = 0.5/SERVO_MAX_ANGLE_DEG;
 
 
@@ -93,6 +93,27 @@ void set_steering_deg(int16_t steeringAngle){
 	// 1.5 + ( +-1)*(value from 60 to 60)*(0.5/60)
 	double servoPulse= 1.5 +  (steeringAngle * oneDegDC);
 	set_servo_pulse(servoPulse);
+}
+
+void steering_alignment(uint16_t* smoothData){
+	double servo_pos;
+	int change; 
+
+	for(int i = 0; i < 128; i++){
+		change = 64-smoothData[i]; 
+
+		// if car is on track then, the servo's position stays the same
+		if (onTrack(change) == TRUE){ 
+			servo_pos = change;
+		}
+
+		// if off track, the servo position is readjusted
+		else{
+			servo_pos = CENTER_VAL + (((double)change/45.0) * CENTER_VAL);
+			TIMER_A2_PWM_DutyCycle(servo_pos, 1);
+		}
+	}
+	
 }
 	
 
