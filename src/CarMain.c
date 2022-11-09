@@ -20,7 +20,7 @@
 #define 	BASIC_TESTING
 
 // turn increments (tuning how hard we turn) - unitless rn
-#define TURN_INCREMENT 	(3)
+#define TURN_INCREMENT 	(2)
 
 
 // FUTURE implement error handling
@@ -36,6 +36,7 @@ BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
 extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
 
+/* motor variables */
 // number from 0 to 100 that will be converted into duty cycle for motor
 int motorSpeed; 
 
@@ -45,13 +46,18 @@ enum motorDir{
 	REV = 1
 };
 
+
+/* steering variables*/
 // angle of wheels in degrees with 0 = straight, + right - left. used for servo
-int16_t turnAngle;
+int8_t steeringAngle; // will only go from -60 to 60
+
+
+
 
 // if edge has been detected near car (or maybe just at all - tbd )
-BOOLEAN edgeNear;
+//BOOLEAN edgeNear;
 // edge direction: -1 left, 1 is right, 0 straight ahead (we'll turn left 0)
-signed int edgeDir;
+//signed int edgeDir;
 
 
 /* currently unused but things to implement */
@@ -65,7 +71,7 @@ signed int edgeDir;
 //motorSpeed = NORMAL_SPEED;
 //turnAngle = 0;
 //edgeNear = 0;
-//onTrack = 1;
+
 
 
 // [x] implement logic conditionals
@@ -102,6 +108,14 @@ signed int edgeDir;
 //	}
 //}
 
+
+void steer_to_center(uint8_t trackCenter){
+	int8_t steerAng;	// ang deg center of car to center of track
+	// if less than 64 will be negative and left, otherwise pos and right
+	steerAng = 64 - trackCenter;
+	// 64 is close enough to 60. if it is greater than 60 or less than -60 bounding func will get
+	set_steering_deg(steerAng*TURN_INCREMENT);
+}
 
 
 // NOTE we want to abstract away the hardware details in main
@@ -140,6 +154,8 @@ int main(void){
 		trackCenterIndex = get_track_center(smoothLine);
 		trackCenterValue = smoothLine[trackCenterIndex];
 		carOnTrack = get_on_track(trackCenterValue);
+
+		steer_to_center(trackCenterIndex);
 
 		if(carOnTrack){
 			// make the LED green if on the track
