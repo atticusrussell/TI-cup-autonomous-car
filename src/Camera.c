@@ -22,7 +22,6 @@
 #include "ADC14.h"
 #include "ControlPins.h"
 
-#define TRACK_MIN_VAL	(10000)
 
 
 /**
