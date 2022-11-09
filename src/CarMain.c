@@ -155,16 +155,19 @@ int main(void){
 		trackCenterValue = smoothLine[trackCenterIndex];
 		carOnTrack = get_on_track(trackCenterValue);
 
+		// turn the sevo towards the center of the track
 		steer_to_center(trackCenterIndex);
 
 		if(carOnTrack){
+			DC_motors_enable();
 			// make the LED green if on the track
 			LED2_SetColor(GREEN);
-			// TODO turn the sevo towards the center of the track
+			motors_move(NORMAL_SPEED, 0);
 			
 		} else{
 			//we are off the track
 			LED2_SetColor(RED);
+			stop_DC_motors();
 		}
 
 
