@@ -73,7 +73,7 @@ int8_t steeringAngle; // will only go from -60 to 60
 //edgeNear = 0;
 
 
-
+/* Milestone 1 and 2 - carpet detection and stop, bidirectional oval */
 // [x] implement logic conditionals
 // [x] call update functions
 // [x] refine existing servo code with callable functions
@@ -84,14 +84,27 @@ int8_t steeringAngle; // will only go from -60 to 60
 // [x] test in hardware the motor function
 // [x] test camera functionality/ look at the MATLAB plot of the track lab5 code
 // [x] create function to use the camera to see if on the track
-// [ ] create specific carpet detection function in some file (milestone 1)
-// [ ] create function to detect edge with camera
-// [ ] create function to report edge direction with camera 
 // [x] figure out what direction the center of the track is
-// [ ] turn the wheels towards the center of the track
+// [x] turn the wheels towards the center of the track
+// [x] get signoff for MS1 = carpet detection and biderectional oval
 
-// FUTURE use switches and OLED to selelct different track mode and display
-// FUTURE use interrupts when doing track edge detection for optimization
+/* Milestone 2 - Figure 8 intersection*/
+// [x] test figure 8 
+// [x] get signoff for figure 8  - demo to TA. 
+
+/* Milestone 3 -  PID Control */
+// [ ] outline PID control implementation for steering
+// [ ] fill in rough pid control framework
+// [ ] test PID control
+// [ ] refine PID control
+// [ ] obtain signoff
+
+// RACE 
+// [ ] Create modes with different levels of aggression/ motor DC
+// [ ] use switches to select different track mode
+// [ ] use LED to display track mode  
+// [ ] Test car in different track configurations
+// [ ] test different modes and optimize
 
 
 
@@ -108,12 +121,17 @@ int8_t steeringAngle; // will only go from -60 to 60
 //	}
 //}
 
-
+/**
+ * @brief steers the servo to the center of the track
+ * 
+ * @param trackCenter a number from 1 to 128 that indicates the track center
+ */
 void steer_to_center(uint8_t trackCenter){
 	int8_t steerAng;	// ang deg center of car to center of track
 	// if less than 64 will be negative and left, otherwise pos and right
 	steerAng = 64 - trackCenter;
-	// 64 is close enough to 60. if it is greater than 60 or less than -60 bounding func will get
+	// 64 is close enough to 60. 
+	// if it is greater than 60 or less than -60 bounding func will catch
 	set_steering_deg(steerAng*TURN_INCREMENT);
 }
 
@@ -139,8 +157,6 @@ int main(void){
 	while(1){
 
 		#ifdef BASIC_TESTING
-		// TODO write some basic test functionality here
-		// TODO write this such that the servo points the wheels towards the center of the track
 
 		// light up the LED when the camera is sending data
 		if(g_sendData== TRUE){
