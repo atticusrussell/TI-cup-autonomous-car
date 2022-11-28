@@ -18,10 +18,10 @@
 #include "ControlPins.h"
 #include "PID.h"
 
-#define 	USE_PID_STEERING
+// #define 	USE_PID_STEERING
 
 // turn increments (tuning how hard we turn) - unitless rn
-#define TURN_INCREMENT 	(2)
+#define TURN_INCREMENT 	(3)
 
 
 /* define the variables here that define state of car and we're gonna modify */
