@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
+#include <math.h>
 #include "msp.h"
 #include "TimerA.h"
 #include "ServoMotor.h"
@@ -67,6 +67,16 @@ void set_servo_pulse(double servoPulse){
  * @return int: -1 if negative, 1 if positive
  */
 int sign(int x) {
+    return (x > 0) - (x < 0);
+}
+
+/**
+ * @brief takes the sign of an float
+ * 
+ * @param x 
+ * @return int: -1 if negative, 1 if positive
+ */
+int fsign(float x) {
     return (x > 0) - (x < 0);
 }
 
