@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include "msp.h"
 #include "TimerA.h"
 #include "ServoMotor.h"
@@ -71,21 +72,34 @@ int sign(int x) {
 
 
 /**
- * @brief Set the angle of the steering in degrees
+ * @brief constrains an input steering angle so that it is within servo mechanical bounds
  * 
- * @param steeringAngle an angle in degrees to set the steering. -left, +right
- * @note using int for now - FUTURE convert to float if more precision needed
+ * @param steeringAngle the steering angle to be constrained
+ * @return float = the constrained steering angle
  */
-void set_steering_deg(int16_t steeringAngle){
-	int direction = sign(steeringAngle); 
+float bound_steering_angle(float steeringAngle){
+	int direction = fsign(steeringAngle);
 	// make sure that it is within the correct bounds
-	if (abs(steeringAngle) > SERVO_MAX_ANGLE_DEG){
+	if (fabs(steeringAngle) > SERVO_MAX_ANGLE_DEG){
 		if(direction == -1){
 			steeringAngle = -SERVO_MAX_ANGLE_DEG;
 		} else{
 			steeringAngle = SERVO_MAX_ANGLE_DEG;
 		}
 	}
+	return steeringAngle;
+}
+
+
+/**
+ * @brief Set the angle of the steering in degrees
+ * 
+ * @param steeringAngle an angle in degrees to set the steering. -left, +right
+ * @note using int for now - //FUTURE convert to float if more precision needed
+ */
+void set_steering_deg(int16_t steeringAngle){
+	// make sure that it is within the correct bounds
+	steeringAngle = bound_steering_angle((float)steeringAngle);
 	/* A 1.5ms pulse says do not turn at all
 	* 	A 1.0ms pulse says to turn 90o	counter-clockwise
 	* 	A 2.0ms pulse says to turn 90o in the clockwise direction	 */
