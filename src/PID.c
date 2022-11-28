@@ -14,20 +14,20 @@
 
 
 float ImplementPID(pid_nums_t pidN, float current, float intended){
-	float new_val;
-	pidN.error = intended - current;
+	float setPoint, error;
+	error = intended - current;
 
 	// informed by lecture 21 - control -  slide 35
-	new_val = current +
-		pidN.kp * (pidN.error - pidN.error_n1) +
-		pidN.ki * (pidN.error + pidN.error_n1)/2.0 *
-		pidN.kd * (pidN.error - 2.0*pidN.error_n1 + pidN.error_n2);
+	setPoint = current +
+		pidN.kp * (error - pidN.error_n1) +
+		pidN.ki * (error + pidN.error_n1)/2.0 *
+		pidN.kd * (error - 2.0*pidN.error_n1 + pidN.error_n2);
 
 	// update struct
 	pidN.error_n2 = pidN.error_n1;
-	pidN.error_n1 = pidN.error;
-	pidN.val_n1 = new_val; 
+	pidN.error_n1 = error;
+	pidN.setPoint_n1 = setPoint; 
 	
-	return new_val;
+	return setPoint;
 }
 

@@ -14,18 +14,13 @@ typedef struct pid_nums{
 	float kp;
 	float ki;
 	float kd;
-	float error;
 	float error_n1;		// last error
-	float error_n2; 	// two errors ago
-	float val_n1;		// last value
+	float error_n2; 		// two errors ago
+	float setPoint_n1;	// last setpoint 
 } pid_nums_t;
 
 
- /* Function prototypes */ 
-
-// void INIT_Camera(void);
-// BOOLEAN get_on_track(uint16_t maxCamVal);
-// uint8_t get_track_center(uint16_t* smoothData);
-// void smooth_line(uint16_t* rawData, uint16_t* smoothData);
+/* Function prototypes */
+float ImplementPID(pid_nums_t pidN, float current, float intended);
 
  #endif

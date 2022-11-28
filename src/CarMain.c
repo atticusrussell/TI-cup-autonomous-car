@@ -16,14 +16,14 @@
 #include "Camera.h"
 #include	"LEDs.h"
 #include "ControlPins.h"
+#include "PID.h"
 
-#define 	BASIC_TESTING
+#define 	USE_PID_STEERING
 
 // turn increments (tuning how hard we turn) - unitless rn
 #define TURN_INCREMENT 	(2)
 
 
-// FUTURE implement error handling
 /* define the variables here that define state of car and we're gonna modify */
 
 
@@ -51,20 +51,6 @@ enum motorDir{
 // angle of wheels in degrees with 0 = straight, + right - left. used for servo
 int8_t steeringAngle; // will only go from -60 to 60
 
-
-
-
-// if edge has been detected near car (or maybe just at all - tbd )
-//BOOLEAN edgeNear;
-// edge direction: -1 left, 1 is right, 0 straight ahead (we'll turn left 0)
-//signed int edgeDir;
-
-
-/* currently unused but things to implement */
-// FUTURE distance to the edge if we know it/ can find it
-// int edgeDist;
-
-// FUTURE centralize delay function
 
 ///* initialize state variables to starting values */
 //motorDir = FWD;
@@ -96,8 +82,9 @@ int8_t steeringAngle; // will only go from -60 to 60
 // [ ] outline PID control implementation for steering
 // [ ] fill in rough pid control framework
 // [ ] test PID control
+// [ ] tune PID control (look into automated tuning)
 // [ ] refine PID control
-// [ ] obtain signoff
+// [ ] obtain signoff for PID - TA demo
 
 // RACE 
 // [ ] Create modes with different levels of aggression/ motor DC
@@ -106,34 +93,40 @@ int8_t steeringAngle; // will only go from -60 to 60
 // [ ] Test car in different track configurations
 // [ ] test different modes and optimize
 
+// optional
+// [ ] implement differential drive for sharper turning
+// [ ] use the visual mass to determine corners vs straights and set drive speed
+// [ ] create states for approaching corner, in corner, leaving corner,
+// [ ] convert to using improved CortexM file made during DAC EC by AJR
+// [ ] implement PID control of the drive motors
+
+// very optional
+// FUTURE distance to the edge if we know it/ can find it
+// FUTURE centralize delay function
+// if edge has been detected near car (or maybe just at all - tbd )
+//BOOLEAN edgeNear;
+// edge direction: -1 left, 1 is right, 0 straight ahead (we'll turn left 0)
+//signed int edgeDir;
 
 
-///**
-// * @brief waits for a delay (in milliseconds)
-// * 
-// * @param del - The delay in milliseconds
-// * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
-// */
-//void delay(int del){
-//	volatile int i;
-//	for (i=0; i<del*50000; i++){
-//		;// Do nothing
-//	}
-//}
 
-/**
- * @brief steers the servo to the center of the track
- * 
- * @param trackCenter a number from 1 to 128 that indicates the track center
- */
-void steer_to_center(uint8_t trackCenter){
-	int8_t steerAng;	// ang deg center of car to center of track
-	// if less than 64 will be negative and left, otherwise pos and right
-	steerAng = 64 - trackCenter;
-	// 64 is close enough to 60. 
-	// if it is greater than 60 or less than -60 bounding func will catch
-	set_steering_deg(steerAng*TURN_INCREMENT);
-}
+
+
+
+	/**
+	 * @brief steers the servo to the center of the track
+	 * 
+	 * @param trackCenter a number from 1 to 128 that indicates the track center
+	 */
+	void steer_to_center(uint8_t trackCenter){
+		int8_t steerAng;	// ang deg center of car to center of track
+		// if less than 64 will be negative and left, otherwise pos and right
+		steerAng = 64 - trackCenter;
+		// 64 is close enough to 60. 
+		// if it is greater than 60 or less than -60 bounding func will catch
+		set_steering_deg(steerAng*TURN_INCREMENT);
+	}
+
 
 
 // NOTE we want to abstract away the hardware details in main
@@ -141,11 +134,8 @@ int main(void){
 	// FUTURE make into its own function
 	/* Initialize each component of the car*/
 	DisableInterrupts();
-	// call initialization function for servo
 	servo_init();
-	// call initialization function for motor
 	DC_motors_init();
-	// call initialization function for camera
 	INIT_Camera();
 	// enable the LEDs for signaling state info
 	LED1_Init();
@@ -153,10 +143,23 @@ int main(void){
 	// enable interrupts so the camera updates
 	EnableInterrupts();
 
+	#ifdef USE_PID_STEERING
+	// FUTURE move this out of main() if possible - maybe init func?
+	// define PID vars if applicable
+	pid_nums_t steer_PID;
+	// initialize all of the past vars to zero as shown in slides
+	steer_PID.error_n1 = 0;
+	steer_PID.error_n2 = 0;
+	steer_PID.setPoint_n1 = 0;
+	// TODO tune these values - 0.5, 0.0, 0.0 is a place to start
+	steer_PID.kp = 0.5; // [ ] tuned kp
+	steer_PID.ki = 0.0; // [ ] tuned ki
+	steer_PID.kd = 0.0; // [ ] OPTIONAL tuned kd
+	#endif
+
 	// infinite loop to contain logic
 	while(1){
 
-		#ifdef BASIC_TESTING
 
 		// light up the LED when the camera is sending data
 		if(g_sendData== TRUE){
@@ -172,7 +175,14 @@ int main(void){
 		carOnTrack = get_on_track(trackCenterValue);
 
 		// turn the sevo towards the center of the track
+		#ifndef USE_PID_STEERING
+		// just use regular steering method
 		steer_to_center(trackCenterIndex);
+		#else 
+		// use PID steering
+		steer_to_center(ImplementPID(steer_PID,steer_PID.setPoint_n1,trackCenterIndex));
+
+		#endif
 
 		if(carOnTrack){
 			DC_motors_enable();
@@ -185,60 +195,64 @@ int main(void){
 			LED2_SetColor(RED);
 			stop_DC_motors();
 		}
-
-
-
-
-
-		#else // run the actual code
-
-
-
-
-
-		// if on the track
-		if(onTrack){
-			if(edgeNear){
-				// go to slower speed
-				// NOTE we may want to do this incrementally too - tbd
-				motorSpeed = TURN_SPEED;
-
-				/* turn wheels opposite dir to found edge */
-				// hopefully this will update fast enough to turn incrementally
-				if(edgeDir <= 0){ // if edge to the left or straight ahead
-					// adjustments to turn right
-					turnAngle += TURN_INCREMENT;
-				} else{
-					// turn left
-					turnAngle -= TURN_INCREMENT;
-				}
-			} else{ 
-				/* no edge detected or near */
-				turnAngle = 0; //set steering straight
-				motorSpeed = NORMAL_SPEED;
-			}
-
-		} else {
-			/* not on track */
-			motorSpeed = 0; // stop the car
-			// FUTURE in future reverse back onto track maybe
-		}
-
-		/* call the code -> real world update functions */
-		set_motor_speed(motorSpeed);
-		set_motor_dir(motorDir);
-		set_steering_deg(turnAngle);
-
-		/* update functions map from real world -> code */
-		edgeNear = get_edge_near();
-		if (edgeNear){
-			edgeDir = get_edge_dir();
-		}
-		onTrack = get_on_track();
-
-		#endif
-
 	}
 	
 	// return 0;  // never reached due to infinite while loop
 }
+
+
+// //  delay function if needed - shouldn't use this  -  use CortexM mod (DAC)
+///**
+// * @brief waits for a delay (in milliseconds)
+// * 
+// * @param del - The delay in milliseconds
+// * @note not accurate in milliseconds with 3 MHz clk. maybe with 48?
+// */
+//void delay(int del){
+//	volatile int i;
+//	for (i=0; i<del*50000; i++){
+//		;// Do nothing
+//	}
+//}
+
+/* initial concept / pseudocode to use as guidance/notes
+
+	if(onTrack){
+		if(edgeNear){
+			// go to slower speed
+			// NOTE we may want to do this incrementally too - tbd
+			motorSpeed = TURN_SPEED;
+
+			// turn wheels opposite dir to found edge 
+			// hopefully this will update fast enough to turn incrementally
+			if(edgeDir <= 0){ // if edge to the left or straight ahead
+				// adjustments to turn right
+				turnAngle += TURN_INCREMENT;
+			} else{
+				// turn left
+				turnAngle -= TURN_INCREMENT;
+			}
+		} else{ 
+			// no edge detected or near 
+			turnAngle = 0; //set steering straight
+			motorSpeed = NORMAL_SPEED;
+		}
+
+	} else {
+		// not on track 
+		motorSpeed = 0; // stop the car
+		// FUTURE in future reverse back onto track maybe
+	}
+
+	// call the code -> real world update functions 
+	set_motor_speed(motorSpeed);
+	set_motor_dir(motorDir);
+	set_steering_deg(turnAngle);
+
+	// update functions map from real world -> code 
+	edgeNear = get_edge_near();
+	if (edgeNear){
+		edgeDir = get_edge_dir();
+	}
+	onTrack = get_on_track();
+ */
