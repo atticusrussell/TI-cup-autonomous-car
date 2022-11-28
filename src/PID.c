@@ -13,47 +13,39 @@
 #include "PID.h"
 #include "ServoMotor.h"
 
-/**
- * @brief reusable implementation of PID algorithm
- * 
- * @param pidHist_p 	pointer to PID struct
- * @param current  current value of the output
- * @param intended desired value of the output
- * @return float new setpoint
- */
-float ReusePID(pid_tune_t pidTune, pid_hist_t* pidHist_p, float current, float intended){
-	
-	float setPoint, error;
-	error = intended - current;
 
-	// informed by lecture 21 - control -  slide 35
-	setPoint = current +
-		pidTune.kp * (error - pidHist_p->error_n1) +
-		pidTune.ki * (error + pidHist_p->error_n1)*0.5f +
-		pidTune.kd * (error - 2.0f*pidHist_p->error_n1 + pidHist_p->error_n2);
 
-	// update struct
-	pidHist_p->error_n2 = pidHist_p->error_n1;
-	pidHist_p->error_n1 = error;
-	pidHist_p->setPoint_n1 = setPoint; 
-	
-	return setPoint;
+/* global shit because I'm struggling to do this tastefully*/
+float setPoint;
+float setPoint_n1;
+float error, error_n1, error_n2;
+// gets rid of implicit type conversion warning
+float kpSteer = KP_STEER; 
+float kiSteer = KI_STEER; 
+float kdSteer = KD_STEER; 
+
+
+
+void steering_pid_init(void){
+	setPoint = 0;
+	setPoint_n1 = 0;
+	error = 0.0;
+	error_n1 = 0.0;
+	error_n2 = 0.0;
 }
 
 
-/**
- * @brief servo steering specific implementation of PID
- * 
- * @param pidHist_p pointer to the PID struct for the servo
- * @param current current value of the servo pointing
- * @param intended desired value of the servo pointing
- * @return float new setpoint 
- */
-float SteeringPID(pid_tune_t pidTune, pid_hist_t* pidHist_p, float current, float intended){
-	float setPoint = ReusePID(pidTune, pidHist_p, current, intended);
-	// prevent integral overshoot/ runaway through bounding
-	// TODO try not bounding this and see what happens
-	setPoint = fbound_steering_angle(setPoint);
-	pidHist_p->setPoint_n1 = setPoint;
+float SteeringPID(float intended){
+	error = intended - setPoint_n1;
+	setPoint = setPoint_n1 +
+		kpSteer * (error - error_n1) +
+		kiSteer * (error + error_n1)*0.5f +
+		kdSteer * (error - 2.0f * error_n1 + error_n2);
+
+	// update history
+	error_n2 = error_n1;
+	error_n1 = error;
+	setPoint_n1 = setPoint;
+
 	return setPoint;
 }

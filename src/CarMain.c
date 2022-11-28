@@ -23,6 +23,8 @@
 // turn increments (tuning how hard we turn) - unitless rn
 #define TURN_INCREMENT 	(3)
 
+// #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
+
 
 /* define the variables here that define state of car and we're gonna modify */
 
@@ -50,6 +52,28 @@ enum motorDir{
 /* steering variables*/
 // angle of wheels in degrees with 0 = straight, + right - left. used for servo
 int8_t steeringAngle; // will only go from -60 to 60
+
+
+// /* PID calling vars*/
+// int16_t trackCenterDeg;
+#ifdef USE_PID_STEERING
+// FUTURE move this out of main() if possible - maybe init func?
+// define PID vars if applicable
+// pid_tune_t steerPIDTune;
+
+
+// pid_hist_t steerPIDHist;
+
+
+// intermediate vars to provide visibility into PID actions
+float trackCenterDeg = 0.0;
+float PIDRes;
+float angleScale = 121.0/128.0;
+int16_t roughCenter;
+int16_t scaledCenter;
+int16_t iPIDRes;
+// initialize to zero deg
+#endif
 
 
 ///* initialize state variables to starting values */
@@ -113,19 +137,19 @@ int8_t steeringAngle; // will only go from -60 to 60
 
 
 
-	/**
-	 * @brief steers the servo to the center of the track
-	 * 
-	 * @param trackCenter a number from 1 to 128 that indicates the track center
-	 */
-	void steer_to_center(uint8_t trackCenter){
-		int8_t steerAng;	// ang deg center of car to center of track
-		// if less than 64 will be negative and left, otherwise pos and right
-		steerAng = 64 - trackCenter;
-		// 64 is close enough to 60. 
-		// if it is greater than 60 or less than -60 bounding func will catch
-		set_steering_deg(steerAng*TURN_INCREMENT);
-	}
+/**
+ * @brief steers the servo to the center of the track
+ * 
+ * @param trackCenter a number from 1 to 128 that indicates the track center
+ */
+void steer_to_center(uint8_t trackCenter){
+	int8_t steerAng;	// ang deg center of car to center of track
+	// if less than 64 will be negative and left, otherwise pos and right
+	steerAng = 64 - trackCenter;
+	// 64 is close enough to 60. 
+	// if it is greater than 60 or less than -60 bounding func will catch
+	set_steering_deg(steerAng*TURN_INCREMENT);
+}
 
 
 
@@ -135,46 +159,46 @@ int main(void){
 	/* Initialize each component of the car*/
 	DisableInterrupts();
 	servo_init();
+	#ifndef DISABLE_DRIVE_MOTORS
 	DC_motors_init();
+	#endif
 	INIT_Camera();
 	// enable the LEDs for signaling state info
 	LED1_Init();
 	LED2_Init();
 	// enable interrupts so the camera updates
 	EnableInterrupts();
-
+	
 	#ifdef USE_PID_STEERING
-	// FUTURE move this out of main() if possible - maybe init func?
-	// define PID vars if applicable
-	pid_tune_t steerPIDTune;
-	// TODO tune these values - 0.5, 0.0, 0.0 is a place to start from slides
-	steerPIDTune.kp = 0.005; // [ ] tuned kp
-	steerPIDTune.ki = 0.025; // [ ] tuned ki
-	steerPIDTune.kd = 0.0045; // [ ] OPTIONAL tuned kd
+	/* initializing PID structs*/
+	// // TODO tune these values - 0.5, 0.0, 0.0 is a place to start from slides
+	// steerPIDTune.kp = 0.45; // [ ] tuned kp
+	// steerPIDTune.ki = 0.2; // [ ] tuned ki
+	// steerPIDTune.kd = 0.0; // [ ] OPTIONAL tuned kd
 
-	pid_hist_t steerPIDHist;
-	// initialize all of the past vars to zero as shown in slides
-	steerPIDHist.error_n1 = 0;
-	steerPIDHist.error_n2 = 0;
-	steerPIDHist.setPoint_n1 = 0;
+	// // initialize all of the past vars to zero as shown in slides
+	// steerPIDHist.error_n1 = 0;
+	// steerPIDHist.error_n2 = 0;
+	// steerPIDHist.setPoint_n1 = 0;
+	steering_pid_init();
 	#endif
 
 	// infinite loop to contain logic
 	while(1){
 
 
-		// light up the LED when the camera is sending data
+		// light up the LED and do processing when the camera is sending data
 		if(g_sendData== TRUE){
 			LED1_On();
+			smooth_line(line,smoothLine);
+			trackCenterIndex = get_track_center(smoothLine);
+			trackCenterValue = smoothLine[trackCenterIndex];
+			carOnTrack = get_on_track(trackCenterValue);
 		} else{
 			LED1_Off();
 		}
 
 
-		smooth_line(line,smoothLine);
-		trackCenterIndex = get_track_center(smoothLine);
-		trackCenterValue = smoothLine[trackCenterIndex];
-		carOnTrack = get_on_track(trackCenterValue);
 
 		// turn the sevo towards the center of the track
 		#ifndef USE_PID_STEERING
@@ -182,20 +206,40 @@ int main(void){
 		steer_to_center(trackCenterIndex);
 		#else 
 		// use PID steering
-		steer_to_center(SteeringPID(steerPIDTune, &steerPIDHist, steerPIDHist.setPoint_n1 ,trackCenterIndex));
+		
+		// // lets tell PID that positive and negative exist
+		// // convert from value between 0 and 127 to -60 to 60
+		// scaledCenter = trackCenterIndex * angleScale;
+		// trackCenterDeg = 60 - scaledCenter;
+
+		roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned lol
+		scaledCenter = roughCenter * 4;
+
+		// bound the shit 
+		if (scaledCenter < -60){ scaledCenter = -60;}
+		if (scaledCenter > 60){ scaledCenter = 60;}
+
+		PIDRes = SteeringPID(scaledCenter);
+		iPIDRes = (int16_t) PIDRes;	
+		// steer to calculated point
+		set_steering_deg(iPIDRes);
 
 		#endif
 
 		if(carOnTrack){
-			DC_motors_enable();
 			// make the LED green if on the track
 			LED2_SetColor(GREEN);
+			#ifndef DISABLE_DRIVE_MOTORS
+			DC_motors_enable();
 			motors_move(NORMAL_SPEED, 0);
+			#endif
 			
 		} else{
 			//we are off the track
 			LED2_SetColor(RED);
+			#ifndef DISABLE_DRIVE_MOTORS
 			stop_DC_motors();
+			#endif
 		}
 	}
 	
