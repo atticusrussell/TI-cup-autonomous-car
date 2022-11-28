@@ -20,8 +20,8 @@ float ImplementPID(pid_nums_t pidN, float current, float intended){
 	// informed by lecture 21 - control -  slide 35
 	setPoint = current +
 		pidN.kp * (error - pidN.error_n1) +
-		pidN.ki * (error + pidN.error_n1)/2.0 *
-		pidN.kd * (error - 2.0*pidN.error_n1 + pidN.error_n2);
+		pidN.ki * (error + pidN.error_n1)*0.5f *
+		pidN.kd * (error - 2.0f*pidN.error_n1 + pidN.error_n2);
 
 	// update struct
 	pidN.error_n2 = pidN.error_n1;

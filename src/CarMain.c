@@ -79,7 +79,7 @@ int8_t steeringAngle; // will only go from -60 to 60
 // [x] get signoff for figure 8  - demo to TA. 
 
 /* Milestone 3 -  PID Control */
-// [ ] outline PID control implementation for steering
+// [x] outline PID control implementation for steering
 // [ ] fill in rough pid control framework
 // [ ] test PID control
 // [ ] tune PID control (look into automated tuning)
