@@ -105,12 +105,15 @@ int16_t iPIDRes;
 /* Milestone 3 -  PID Control */
 // [x] outline PID control implementation for steering
 // [x] fill in rough pid control framework
-// [ ] test PID control
-// [ ] tune PID control (look into automated tuning)
-// [ ] make PID control lap track proficiently
-// [ ] obtain signoff for PID - TA demo
+// [x] test PID control
+// [x] tune PID control (look into automated tuning)
+// [x] make PID control lap track proficiently
+// [x] obtain signoff for PID - TA demo
+// NOTE the tuning params are janky as hell rn but got the demo!!
+
 
 // RACE 
+// [ ] Either further tune or abandon PID.
 // [ ] Create modes with different levels of aggression/ motor DC
 // [ ] use switches to select different track mode
 // [ ] use LED to display track mode  
