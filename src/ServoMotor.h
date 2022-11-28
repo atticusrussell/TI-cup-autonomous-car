@@ -27,7 +27,8 @@
  /* Function prototypes */
  int sign(int x);
  int fsign(float x);
- float bound_steering_angle(float steeringAngle);
+ int 	ibound_steering_angle(int steeringAngle);
+ float fbound_steering_angle(float steeringAngle);
  void servo_init(void);
  void set_servo_pulse(double servoDC);
  void set_steering_deg(int16_t steeringAngle);

@@ -51,6 +51,6 @@ float ReusePID(pid_nums_t* pidN_p, float current, float intended){
 float SteeringPID(pid_nums_t* pidN_p, float current, float intended){
 	float setPoint = ReusePID(pidN_p, current, intended);
 	// prevent integral overshoot/ runaway
-	setPoint = bound_steering_angle(setPoint);
+	setPoint = fbound_steering_angle(setPoint);
 	return setPoint;
 }

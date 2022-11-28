@@ -87,10 +87,30 @@ int fsign(float x) {
  * @param steeringAngle the steering angle to be constrained
  * @return float = the constrained steering angle
  */
-float bound_steering_angle(float steeringAngle){
+float fbound_steering_angle(float steeringAngle){
 	int direction = fsign(steeringAngle);
 	// make sure that it is within the correct bounds
 	if (fabs(steeringAngle) > SERVO_MAX_ANGLE_DEG){
+		if(direction == -1){
+			steeringAngle = -SERVO_MAX_ANGLE_DEG;
+		} else{
+			steeringAngle = SERVO_MAX_ANGLE_DEG;
+		}
+	}
+	return steeringAngle;
+}
+
+
+/**
+ * @brief constrains an integer input steering angle so that it is within servo mechanical bounds
+ * 
+ * @param steeringAngle the integer steering angle to be constrained
+ * @return int = the constrained steering angle
+ */
+int ibound_steering_angle(int steeringAngle){
+	int direction = sign(steeringAngle);
+	// make sure that it is within the correct bounds
+	if (abs(steeringAngle) > SERVO_MAX_ANGLE_DEG){
 		if(direction == -1){
 			steeringAngle = -SERVO_MAX_ANGLE_DEG;
 		} else{
@@ -109,7 +129,7 @@ float bound_steering_angle(float steeringAngle){
  */
 void set_steering_deg(int16_t steeringAngle){
 	// make sure that it is within the correct bounds
-	steeringAngle = bound_steering_angle((float)steeringAngle);
+	steeringAngle = ibound_steering_angle(steeringAngle);
 	/* A 1.5ms pulse says do not turn at all
 	* 	A 1.0ms pulse says to turn 90o	counter-clockwise
 	* 	A 2.0ms pulse says to turn 90o in the clockwise direction	 */
