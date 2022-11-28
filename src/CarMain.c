@@ -180,7 +180,7 @@ int main(void){
 		steer_to_center(trackCenterIndex);
 		#else 
 		// use PID steering
-		steer_to_center(ImplementPID(steer_PID,steer_PID.setPoint_n1,trackCenterIndex));
+		steer_to_center(SteeringPID(&steer_PID, steer_PID.setPoint_n1, trackCenterIndex));
 
 		#endif
 
