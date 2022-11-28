@@ -18,7 +18,7 @@
 #include "ControlPins.h"
 #include "PID.h"
 
-// #define 	USE_PID_STEERING
+#define USE_PID_STEERING
 
 // turn increments (tuning how hard we turn) - unitless rn
 #define TURN_INCREMENT 	(3)
@@ -80,10 +80,10 @@ int8_t steeringAngle; // will only go from -60 to 60
 
 /* Milestone 3 -  PID Control */
 // [x] outline PID control implementation for steering
-// [ ] fill in rough pid control framework
+// [x] fill in rough pid control framework
 // [ ] test PID control
 // [ ] tune PID control (look into automated tuning)
-// [ ] refine PID control
+// [ ] make PID control lap track proficiently
 // [ ] obtain signoff for PID - TA demo
 
 // RACE 
@@ -146,15 +146,17 @@ int main(void){
 	#ifdef USE_PID_STEERING
 	// FUTURE move this out of main() if possible - maybe init func?
 	// define PID vars if applicable
-	pid_nums_t steer_PID;
+	pid_tune_t steerPIDTune;
+	// TODO tune these values - 0.5, 0.0, 0.0 is a place to start from slides
+	steerPIDTune.kp = 0.005; // [ ] tuned kp
+	steerPIDTune.ki = 0.025; // [ ] tuned ki
+	steerPIDTune.kd = 0.0045; // [ ] OPTIONAL tuned kd
+
+	pid_hist_t steerPIDHist;
 	// initialize all of the past vars to zero as shown in slides
-	steer_PID.error_n1 = 0;
-	steer_PID.error_n2 = 0;
-	steer_PID.setPoint_n1 = 0;
-	// TODO tune these values - 0.5, 0.0, 0.0 is a place to start
-	steer_PID.kp = 0.5; // [ ] tuned kp
-	steer_PID.ki = 0.0; // [ ] tuned ki
-	steer_PID.kd = 0.0; // [ ] OPTIONAL tuned kd
+	steerPIDHist.error_n1 = 0;
+	steerPIDHist.error_n2 = 0;
+	steerPIDHist.setPoint_n1 = 0;
 	#endif
 
 	// infinite loop to contain logic
