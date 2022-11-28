@@ -10,7 +10,7 @@
 #ifndef _PID_HEADER_FILE_
 #define _PID_HEADER_FILE_
 
-#define KP_STEER (0.99)
+#define KP_STEER (0.5)
 #define KI_STEER (0.3)
 #define KD_STEER (0.0)
 
