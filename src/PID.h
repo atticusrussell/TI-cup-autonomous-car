@@ -21,6 +21,7 @@ typedef struct pid_nums{
 
 
 /* Function prototypes */
-float ImplementPID(pid_nums_t pidN, float current, float intended);
+float ReusePID(pid_nums_t* pidN, float current, float intended);
+float SteeringPID(pid_nums_t* pidN, float current, float intended);
 
  #endif
