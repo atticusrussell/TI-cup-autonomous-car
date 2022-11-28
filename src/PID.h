@@ -14,6 +14,10 @@ typedef struct pid_nums{
 	float kp;
 	float ki;
 	float kd;
+	float error;
+	float error_n1;		// last error
+	float error_n2; 	// two errors ago
+	float val_n1;		// last value
 } pid_nums_t;
 
 
