@@ -29,7 +29,7 @@ float ReusePID(pid_tune_t pidTune, pid_hist_t* pidHist_p, float current, float i
 	// informed by lecture 21 - control -  slide 35
 	setPoint = current +
 		pidTune.kp * (error - pidHist_p->error_n1) +
-		pidTune.ki * (error + pidHist_p->error_n1)*0.5f *
+		pidTune.ki * (error + pidHist_p->error_n1)*0.5f +
 		pidTune.kd * (error - 2.0f*pidHist_p->error_n1 + pidHist_p->error_n2);
 
 	// update struct
