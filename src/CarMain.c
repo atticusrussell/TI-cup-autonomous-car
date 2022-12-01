@@ -21,7 +21,7 @@
 
 /* commentable defines to control functionality */
 // #define USE_PID_STEERING
-// #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
+// #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real // TODO eliminate this because of the car arming feature 
 
 #define MODE_SWITCHING
 #define CAR_ARMING
@@ -29,6 +29,7 @@
 
 #define RACECAR_STATE_MACHINE
 #define RSM_LEDS
+#define RSM_SPEED // TODO this actually should just be a boolean that is set for the agressive mode
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
@@ -204,9 +205,9 @@ int main(void){
 	/* create each of the modes*/
 	// TODO set unique high speed and VCMs for each mode
 	int sharedVCM = TUNING_ON_TRACK_VCM;
-	carSettingsT recklessMode = {HIGH_SPEED,MAX_SPEED,sharedVCM};
+	carSettingsT recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
 	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
+	carSettingsT conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
 
 
 	// var that stores the state of the car
@@ -215,6 +216,7 @@ int main(void){
 		// int motorSpeed;
 		enum speedSetting attackMode;
 		enum jeremyClarkson trackPosition;
+		int setSpeed; //the speed that the car is momentarily set to
 		int16_t magnitudeVCM; // value of the camera at the center of the track
 	} carStateT;
 
@@ -330,35 +332,50 @@ int main(void){
 				thisCarState.trackPosition = richardHammond;
 			}
 
-			#ifdef RSM_LEDS
+			// vars to modify in the switch
 			BYTE ledColor;
+			int stateSpeed;
+
 			switch (thisCarState.trackPosition)
 			{
 			case straight:
 				ledColor = RED;
+				stateSpeed = STRAIGHT_SPEED;
 				break;
 			case normal:
 				ledColor = YELLOW;
+				stateSpeed = NORMAL_SPEED;
 				break;
 			case approachingTurn:
 				ledColor = GREEN;
+				stateSpeed = APPROACH_SPEED;
 				break;
 			case turning:
 				ledColor = CYAN;
+				stateSpeed = TURNING_SPEED;
 				break;
 			case trackEdge:
 				ledColor = BLUE;
+				stateSpeed = EDGE_SPEED;
 				break;
 			case richardHammond:
 				ledColor = MAGENTA;
+				stateSpeed = HAMMOND_SPEED;
 				break;
 			
 			default:
 				break;
 			}
+
+			#ifdef RSM_LEDS
 			LED2_SetColor(ledColor);
 			#endif
+
+			#ifdef RSM_SPEED // should be a boolean
+			thisCarState.setSpeed = stateSpeed;
 			#endif
+
+			#endif // ifdef RACECAR_STATE_MACHINE
 
 			// turn the servo towards the center of the track
 			#ifndef USE_PID_STEERING
@@ -385,8 +402,14 @@ int main(void){
 				#endif
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
+
+				#ifndef RSM_SPEED //TODO this should be a boolean
 				motors_move(thisCarSettings.normalSpeed, FWD);
-				#endif
+				#else
+				motors_move(thisCarState.setSpeed,FWD);
+				#endif 
+
+				#endif //ifndef DISABLE_DRIVE_MOTORS
 				
 			} else{
 				//we are off the track
