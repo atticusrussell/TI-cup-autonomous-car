@@ -22,6 +22,8 @@
 /* commentable defines to control functionality */
 // #define USE_PID_STEERING
 // #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
+#define MODE_SWITCHING
+#define CAR_ARMING
 
 
 /* define constants that are important parameters to tune */
@@ -166,9 +168,11 @@ int main(void){
 	int8_t steeringAngle; // will only go from -60 to 60
 	/* end OG variables*/
 
+	#ifdef CAR_ARMING
 	BOOLEAN carArmed = FALSE;
+	#endif
 
-
+	#ifdef MODE_SWITCHING
 	// this is the part of the track the car is on 
 	enum jeremyClarkson{
 		normal = 0,
@@ -204,8 +208,14 @@ int main(void){
 		enum jeremyClarkson trackPosition;
 	} carStateT;
 
-	
 
+
+
+	carStateT thisCarState;
+	thisCarState.attackMode = reckless;
+	thisCarState.trackPosition = normal; 
+	carSettingsT thisCarSettings = recklessMode;
+	#endif
 
 	#ifdef USE_PID_STEERING
 	// define PID vars if applicable
@@ -218,14 +228,10 @@ int main(void){
 	int16_t iPIDRes;
 	#endif
 
-	carStateT thisCarState;
-	thisCarState.attackMode = reckless;
-	thisCarState.trackPosition = normal; 
-	carSettingsT thisCarSettings = recklessMode;
-
 	initCarParts();
 	// infinite loop to contain logic
 	while(1){
+		#ifdef CAR_ARMING
 		if (Switch2_Pressed()){
 			/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
 			if (!carArmed){
@@ -246,7 +252,9 @@ int main(void){
 			// wait a second to avoid push being registered twice
 			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
 		}
+		#endif
 
+		#ifdef MODE_SWITCHING
 		if(Switch1_Pressed()){
 			if(thisCarState.attackMode < conservative){
 				thisCarState.attackMode ++; // go to next mode
@@ -272,19 +280,18 @@ int main(void){
 					break;
 			}
 		}
+		#endif
 
+		#ifdef CAR_ARMING
 		if(carArmed){
+		#endif CAR_ARMING
 			// do processing when the camera is sending data
 			if(g_sendData== TRUE){
 				smooth_line(line,smoothLine);
 				trackCenterIndex = get_track_center(smoothLine);
 				trackCenterValue = smoothLine[trackCenterIndex];
 				carOnTrack = get_on_track(trackCenterValue);
-			} else{
-				LED1_Off();
-			}
-
-
+			} 
 
 			// turn the servo towards the center of the track
 			#ifndef USE_PID_STEERING
@@ -315,18 +322,21 @@ int main(void){
 				//we are off the track
 				// FLASH LED WHITE if we off the track
 				// FUTURE  if this is too slow or not visible use interrupts+timer
-				BYTE prevColor = LED2_GetColor();
-				LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
-				LED2_SetColor(prevColor);
+
+				// NOTE I THINK THIS IS SLOW SO COMMENTING OUT 
+				// BYTE prevColor = LED2_GetColor();
+				// LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
+				// LED2_SetColor(prevColor);
 				#ifndef DISABLE_DRIVE_MOTORS
 				stop_DC_motors();
 				#endif
 			}
+		#ifdef CAR_ARMING
 		} else{
 			stop_DC_motors();
-			// set servos to straight ahead
-			set_steering_deg(0);
+			set_steering_deg(0); // set servos to straight ahead
 		}
+		#endif
 	}
 }
 
