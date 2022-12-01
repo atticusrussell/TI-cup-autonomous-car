@@ -48,11 +48,12 @@ void INIT_Camera(void){
 /**
  * @brief evaluate if the car is on the track based on the y value of center
  * 
- * @param centerCamVal value at visual center of camera data 
+ * @param centerCamVal value at visual center of camera data
+ * @param onTrackThreshold smallest mean value considered "on track"
  * @return True if the car is on track, otherwise false 
  */
-BOOLEAN get_on_track(uint16_t maxCamVal){
-	if (maxCamVal > ON_TRACK_VCM){
+BOOLEAN get_on_track(uint16_t maxCamVal, uint16_t onTrackThreshold){
+	if (maxCamVal > onTrackThreshold){
 		return TRUE; //car is on the track
 	} else{
 		return FALSE; //car is off track

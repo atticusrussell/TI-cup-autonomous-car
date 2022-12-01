@@ -18,7 +18,7 @@
 
  /* Function prototypes */ 
 void INIT_Camera(void);
-BOOLEAN get_on_track(uint16_t maxCamVal);
+BOOLEAN get_on_track(uint16_t maxCamVal, uint16_t onTrackThreshold);
 uint8_t get_track_center(uint16_t* smoothData);
 void smooth_line(uint16_t* rawData, uint16_t* smoothData);
 

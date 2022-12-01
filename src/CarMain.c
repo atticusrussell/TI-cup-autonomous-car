@@ -302,7 +302,7 @@ int main(void){
 				smooth_line(line,smoothLine);
 				trackCenterIndex = get_track_center(smoothLine);
 				trackCenterValue = smoothLine[trackCenterIndex];
-				carOnTrack = get_on_track(trackCenterValue);
+				carOnTrack = get_on_track(trackCenterValue, thisCarSettings.vcmThreshold);
 			} 
 
 			// turn the servo towards the center of the track
