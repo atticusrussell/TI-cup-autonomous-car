@@ -108,5 +108,13 @@ void EndCritical(long sr);    // restore I bit to previous value
  */
 void WaitForInterrupt(void);  
 
+/**
+ * @brief Simple delay function which delays about n milliseconds
+ * 
+ * @param n number of msec to wait
+ * @param clk current clock speed in Hz of processor 
+ */
+void Clock_Delay_n_ms(uint32_t n, uint32_t clk);
+
 #endif
 

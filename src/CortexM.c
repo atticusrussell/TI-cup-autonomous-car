@@ -79,15 +79,18 @@
     bne     delay
     bx      lr
   }
-// ------------Clock_Delay1ms------------
-// Simple delay function which delays about n milliseconds.
-// Inputs: n, number of msec to wait
-// Outputs: none
-void Clock_Delay1ms(uint32_t n)
-{
-  while(n)
-	{
-    delay(8000);   // 1 msec, tuned at 48 MHz
+
+
+/**
+ * @brief Simple delay function which delays about n milliseconds
+ * 
+ * @param n number of msec to wait
+ * @param clk current clock speed in Hz of processor 
+ */
+void Clock_Delay_n_ms(uint32_t n, uint32_t clk){
+	uint32_t waitNum = clk/6000; 	// delay 8000 works for 48 MHz - 6000 is number
+  while(n){
+    delay(waitNum);   // 1 msec
     n--;
   }
 }
