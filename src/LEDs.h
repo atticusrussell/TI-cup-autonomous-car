@@ -20,8 +20,8 @@
 #define BLUE 	 	0b100
 #define GREEN 	 	0b010
 #define CYAN 	 	0b110
-#define MAGENTA		0b101
-#define YELLOW 	 	0b011
+#define MAGENTA	0b101
+#define YELLOW 	0b011
 #define WHITE 	 	0b111
 
 /* Function prototypes */
