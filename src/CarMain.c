@@ -194,6 +194,7 @@ void initCarParts(void){
 int main(void){
 
 
+	initCarParts();
 	// infinite loop to contain logic
 	while(1){
 
