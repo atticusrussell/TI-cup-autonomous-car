@@ -112,20 +112,28 @@ int16_t iPIDRes;
 // NOTE the tuning params are janky as hell rn but got the demo!!
 
 
-// RACE 
-// [ ] Either further tune or abandon PID.
-// [ ] Create modes with different levels of aggression/ motor DC
+// RACE Prep
+// [x] abandon PID steering 
+// [ ] Reduce (tune) minimal visual center of mass so that 2 wheels off track
+// [ ] fix issue with stopping while still on track
+// [ ] Create modes with different levels of aggression/ motor DC and min VCM
 // [ ] use switches to select different track mode
 // [ ] use LED to display track mode  
 // [ ] Test car in different track configurations
 // [ ] test different modes and optimize
 
-// optional
+// optional/ideas
+// [ ] use a scalar multiplier for the different aggression modes
 // [ ] implement differential drive for sharper turning
 // [ ] use the visual mass to determine corners vs straights and set drive speed
+// [ ] determine which edge closer when almost off track - spin that wheel faster to get back on 
 // [ ] create states for approaching corner, in corner, leaving corner,
 // [ ] convert to using improved CortexM file made during DAC EC by AJR
 // [ ] implement PID control of the drive motors
+// [ ] move initialization to seperate function
+// [ ] move some global vars inside of main() for C best practices
+// [ ] convert to follow C best practices from IDE handbook
+// NOTE 0.45 highest DC for motors that won't blow them up
 
 // very optional
 // FUTURE distance to the edge if we know it/ can find it
