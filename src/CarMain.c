@@ -199,7 +199,7 @@ int main(void){
 	while(1){
 
 
-		// light up the LED and do processing when the camera is sending data
+		// do processing when the camera is sending data
 		if(g_sendData== TRUE){
 			LED1_On();
 			smooth_line(line,smoothLine);
@@ -239,8 +239,7 @@ int main(void){
 		#endif
 
 		if(carOnTrack){
-			// make the LED green if on the track
-			LED2_SetColor(GREEN);
+			LED1_Off(); // turn off the LED if on track
 			#ifndef DISABLE_DRIVE_MOTORS
 			DC_motors_enable();
 			motors_move(NORMAL_SPEED, 0);
@@ -248,7 +247,7 @@ int main(void){
 			
 		} else{
 			//we are off the track
-			LED2_SetColor(RED);
+			LED1_On(); // turn on red led if we are off the track
 			#ifndef DISABLE_DRIVE_MOTORS
 			stop_DC_motors();
 			#endif
