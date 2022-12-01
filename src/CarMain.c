@@ -23,7 +23,7 @@
 // #define USE_PID_STEERING
 // #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
 
-// #define MODE_SWITCHING
+#define MODE_SWITCHING
 #define CAR_ARMING
 
 
@@ -91,7 +91,6 @@
 
 // very optional
 // FUTURE distance to the edge if we know it/ can find it
-// FUTURE centralize delay function
 // if edge has been detected near car (or maybe just at all - tbd )
 //BOOLEAN edgeNear;
 // edge direction: -1 left, 1 is right, 0 straight ahead (we'll turn left 0)
@@ -212,9 +211,9 @@ int main(void){
 
 
 
-
 	carStateT thisCarState;
-	thisCarState.attackMode = reckless;
+	thisCarState.attackMode = reckless; //choose the starting mode
+	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
 	thisCarState.trackPosition = normal; 
 	carSettingsT thisCarSettings = recklessMode;
 	#endif
@@ -235,7 +234,7 @@ int main(void){
 	while(1){
 		#ifdef CAR_ARMING
 		if (Switch2_Pressed()){
-			// wait a second to avoid push being registered twice
+			// wait a bit to avoid push being registered twice
 			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
 			/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
 			if (!carArmed){
@@ -258,12 +257,21 @@ int main(void){
 
 		#ifdef MODE_SWITCHING
 		if(Switch1_Pressed()){
-			if(thisCarState.attackMode < conservative){
-				thisCarState.attackMode ++; // go to next mode
+			// wait a bit to avoid push being registered twice
+			Clock_Delay_n_ms(300,HIGH_CLOCK_SPEED);	
+			if(thisCarState.attackMode == reckless){
+				thisCarState.attackMode = balanced; // go to next mode
+			} else if(thisCarState.attackMode == balanced){
+				thisCarState.attackMode = conservative; 
 			} else{
-				thisCarState.attackMode = reckless; // wrap around to starting mode 
+				// wrap around to starting mode 
+				thisCarState.attackMode = reckless;
 			}
+			modeLEDUpdated = FALSE; //need to update mode LED
+		}
 
+		// updates LED2 color based on mode selected
+		if (!modeLEDUpdated){
 			switch (thisCarState.attackMode){
 				case reckless:
 					LED2_SetColor(MAGENTA);
@@ -281,6 +289,7 @@ int main(void){
 					thisCarSettings = balancedMode;
 					break;
 			}
+			modeLEDUpdated = TRUE;
 		}
 		#endif
 
