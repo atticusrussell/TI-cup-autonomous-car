@@ -243,13 +243,15 @@ int main(void){
 				LED1_Off();
 			}
 			carArmed = ~carArmed; //toggle state of the car being armed
+			// wait a second to avoid push being registered twice
+			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
 		}
 
 		if(Switch1_Pressed()){
 			if(thisCarState.attackMode < conservative){
 				thisCarState.attackMode ++; // go to next mode
 			} else{
-				thisCarState.attackMode = 0; // wrap around to starting mode 
+				thisCarState.attackMode = reckless; // wrap around to starting mode 
 			}
 
 			switch (thisCarState.attackMode){
@@ -262,7 +264,7 @@ int main(void){
 					thisCarSettings = balancedMode;
 					break;
 				case conservative:
-					LED2_SetColor(CYAN);
+					LED2_SetColor(BLUE);
 					thisCarSettings = conservativeMode;
 				default:
 					LED2_SetColor(RED);
@@ -271,58 +273,61 @@ int main(void){
 			}
 		}
 
+		if(carArmed){
+			// do processing when the camera is sending data
+			if(g_sendData== TRUE){
+				smooth_line(line,smoothLine);
+				trackCenterIndex = get_track_center(smoothLine);
+				trackCenterValue = smoothLine[trackCenterIndex];
+				carOnTrack = get_on_track(trackCenterValue);
+			} else{
+				LED1_Off();
+			}
 
-		// do processing when the camera is sending data
-		if(g_sendData== TRUE){
-			smooth_line(line,smoothLine);
-			trackCenterIndex = get_track_center(smoothLine);
-			trackCenterValue = smoothLine[trackCenterIndex];
-			carOnTrack = get_on_track(trackCenterValue);
-		} else{
-			LED1_Off();
-		}
 
 
-
-		// turn the servo towards the center of the track
-		#ifndef USE_PID_STEERING
-		// just use regular steering method
-		steer_to_center(trackCenterIndex);
-		#else 
-		// use PID steering
-		// // lets tell PID that positive and negative exist
-		// // convert from value between 0 and 127 to -60 to 60
-		roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned lol
-		scaledCenter = roughCenter * 4;
-		// bound steering 
-		if (scaledCenter < -60){ scaledCenter = -60;}
-		if (scaledCenter > 60){ scaledCenter = 60;}
-		PIDRes = SteeringPID(scaledCenter);
-		iPIDRes = (int16_t) PIDRes;	
-		// steer to calculated point
-		set_steering_deg(iPIDRes);
-		#endif
-
-		if(carOnTrack){
-			#ifndef DISABLE_DRIVE_MOTORS
-			DC_motors_enable();
-			motors_move(NORMAL_SPEED, 0);
+			// turn the servo towards the center of the track
+			#ifndef USE_PID_STEERING
+			// just use regular steering method
+			steer_to_center(trackCenterIndex);
+			#else 
+			// use PID steering
+			// // lets tell PID that positive and negative exist
+			// // convert from value between 0 and 127 to -60 to 60
+			roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned lol
+			scaledCenter = roughCenter * 4;
+			// bound steering 
+			if (scaledCenter < -60){ scaledCenter = -60;}
+			if (scaledCenter > 60){ scaledCenter = 60;}
+			PIDRes = SteeringPID(scaledCenter);
+			iPIDRes = (int16_t) PIDRes;	
+			// steer to calculated point
+			set_steering_deg(iPIDRes);
 			#endif
-			
+
+			if(carOnTrack){
+				#ifndef DISABLE_DRIVE_MOTORS
+				DC_motors_enable();
+				motors_move(NORMAL_SPEED, 0);
+				#endif
+				
+			} else{
+				//we are off the track
+				// FLASH LED WHITE if we off the track
+				// FUTURE  if this is too slow or not visible use interrupts+timer
+				BYTE prevColor = LED2_GetColor();
+				LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
+				LED2_SetColor(prevColor);
+				#ifndef DISABLE_DRIVE_MOTORS
+				stop_DC_motors();
+				#endif
+			}
 		} else{
-			//we are off the track
-			// FLASH LED WHITE if we off the track
-			// FUTURE  if this is too slow or not visible use interrupts+timer
-			BYTE prevColor = LED2_GetColor();
-			LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
-			LED2_SetColor(prevColor);
-			#ifndef DISABLE_DRIVE_MOTORS
 			stop_DC_motors();
-			#endif
+			// set servos to straight ahead
+			set_steering_deg(0);
 		}
 	}
-	
-	// return 0;  // never reached due to infinite while loop
 }
 
 
