@@ -52,7 +52,7 @@ void INIT_Camera(void){
  * @return True if the car is on track, otherwise false 
  */
 BOOLEAN get_on_track(uint16_t maxCamVal){
-	if (maxCamVal > TRACK_MIN_VAL){
+	if (maxCamVal > ON_TRACK_VCM){
 		return TRUE; //car is on the track
 	} else{
 		return FALSE; //car is off track

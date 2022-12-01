@@ -13,8 +13,8 @@
 #ifndef _CAMERA_HEADER_FILE_
 #define _CAMERA_HEADER_FILE_
 
-// the minimum camera value that is considered to be on the tack
-#define TRACK_MIN_VAL	(6000)
+// the minimum camera visual mass center that is considered to be on the track
+#define ON_TRACK_VCM	(6000)
 
  /* Function prototypes */ 
 void INIT_Camera(void);
