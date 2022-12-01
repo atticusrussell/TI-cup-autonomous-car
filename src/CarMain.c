@@ -149,7 +149,7 @@ int main(void){
 	extern uint16_t line[128];			// current array of raw camera data
 	uint16_t smoothLine[128];	// camera data filtered by smoothing
 	uint8_t	trackCenterIndex;	// camera index of the center of the track
-	uint16_t trackCenterValue;	// value of the camera at the center of the track
+	//uint16_t trackCenterValue;	// value of the camera at the center of the track
 	BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
 	extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
@@ -208,6 +208,7 @@ int main(void){
 		// int motorSpeed;
 		enum speedSetting attackMode;
 		enum jeremyClarkson trackPosition;
+		int16_t magnitudeVCM; // value of the camera at the center of the track
 	} carStateT;
 
 
@@ -302,8 +303,8 @@ int main(void){
 			if(g_sendData== TRUE){
 				smooth_line(line,smoothLine);
 				trackCenterIndex = get_track_center(smoothLine);
-				trackCenterValue = smoothLine[trackCenterIndex];
-				carOnTrack = get_on_track(trackCenterValue, thisCarSettings.vcmThreshold);
+				thisCarState.magnitudeVCM = smoothLine[trackCenterIndex];
+				carOnTrack = get_on_track(thisCarState.magnitudeVCM, thisCarSettings.vcmThreshold);
 			} 
 
 			// turn the servo towards the center of the track
