@@ -13,7 +13,7 @@
 #ifndef	_DC_MOTOR_HEADER_FILE_
 #define	_DC_MOTOR_HEADER_FILE_
 
-// constant params to tweak as needed
+// constant params // TODO tweak as needed
 // maximum motor duty cycle to use during straights
 #define MAX_SPEED 		(65) //NOTE untested 
 // normal forward motor duty cycle
@@ -23,7 +23,7 @@
 #define NORMAL_SPEED 	(35)
 #define LOW_SPEED 		(27)	// NOTE untested
 
-// TODO function prototypes
+// function prototypes
 void stop_DC_motors(void);
 void DC_motors_init(void);
 void DC_motors_enable(void);

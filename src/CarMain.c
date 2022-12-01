@@ -22,7 +22,8 @@
 /* commentable defines to control functionality */
 // #define USE_PID_STEERING
 // #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
-#define MODE_SWITCHING
+
+// #define MODE_SWITCHING
 #define CAR_ARMING
 
 
@@ -66,6 +67,10 @@
 
 // RACE Prep
 // [x] abandon PID steering 
+// [x] arm and disarm motors with a button
+// [x] convert to using improved CortexM file made during DAC EC by AJR
+// [x] move initialization to seperate function
+// [x] move some global vars inside of main() for C best practices
 // [ ] Reduce (tune) minimal visual center of mass so that 2 wheels off track
 // [ ] fix issue with stopping while still on track
 // [ ] Create modes with different levels of aggression/ motor DC and min VCM
@@ -80,10 +85,7 @@
 // [ ] use the visual mass to determine corners vs straights and set drive speed
 // [ ] determine which edge closer when almost off track - spin that wheel faster to get back on 
 // [ ] create states for approaching corner, in corner, leaving corner,
-// [ ] convert to using improved CortexM file made during DAC EC by AJR
 // [ ] implement PID control of the drive motors
-// [ ] move initialization to seperate function
-// [ ] move some global vars inside of main() for C best practices
 // [ ] convert to follow C best practices from IDE handbook
 // NOTE 0.45 highest DC for motors that won't blow them up
 
@@ -155,7 +157,7 @@ int main(void){
 
 	/* motor variables */
 	// number from 0 to 100 that will be converted into duty cycle for motor
-	int motorSpeed; 
+	// int motorSpeed; 
 
 	// the direction of the motor -> pin to write to i think
 	enum motorDir{
@@ -165,7 +167,7 @@ int main(void){
 
 	/* steering variables*/
 	// angle of wheels in degrees with 0 = straight, + right - left. used for servo
-	int8_t steeringAngle; // will only go from -60 to 60
+	// int8_t steeringAngle; // will only go from -60 to 60
 	/* end OG variables*/
 
 	#ifdef CAR_ARMING
@@ -233,6 +235,8 @@ int main(void){
 	while(1){
 		#ifdef CAR_ARMING
 		if (Switch2_Pressed()){
+			// wait a second to avoid push being registered twice
+			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
 			/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
 			if (!carArmed){
 				BYTE prevColor = LED2_GetColor();
@@ -249,8 +253,6 @@ int main(void){
 				LED1_Off();
 			}
 			carArmed = ~carArmed; //toggle state of the car being armed
-			// wait a second to avoid push being registered twice
-			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
 		}
 		#endif
 
@@ -284,7 +286,7 @@ int main(void){
 
 		#ifdef CAR_ARMING
 		if(carArmed){
-		#endif CAR_ARMING
+		#endif
 			// do processing when the camera is sending data
 			if(g_sendData== TRUE){
 				smooth_line(line,smoothLine);
@@ -313,6 +315,7 @@ int main(void){
 			#endif
 
 			if(carOnTrack){
+				LED2_SetColor(GREEN);
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
 				motors_move(NORMAL_SPEED, 0);
@@ -320,13 +323,7 @@ int main(void){
 				
 			} else{
 				//we are off the track
-				// FLASH LED WHITE if we off the track
-				// FUTURE  if this is too slow or not visible use interrupts+timer
-
-				// NOTE I THINK THIS IS SLOW SO COMMENTING OUT 
-				// BYTE prevColor = LED2_GetColor();
-				// LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
-				// LED2_SetColor(prevColor);
+				LED2_SetColor(RED);
 				#ifndef DISABLE_DRIVE_MOTORS
 				stop_DC_motors();
 				#endif
