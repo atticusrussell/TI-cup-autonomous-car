@@ -17,70 +17,20 @@
 #include	"LEDs.h"
 #include "ControlPins.h"
 #include "PID.h"
+#include "switches.h"
 
-#define USE_PID_STEERING
-
-// turn increments (tuning how hard we turn) - unitless rn
-#define TURN_INCREMENT 	(3)
-
+/* commentable defines to control functionality */
+// #define USE_PID_STEERING
 // #define DISABLE_DRIVE_MOTORS // NOTE COMMENT THIS OUT TO RUN for real
 
 
-/* define the variables here that define state of car and we're gonna modify */
+/* define constants that are important parameters to tune */
+// turn increments (tuning how hard we turn) unitless scalar
+#define TURN_INCREMENT 	(3)
 
 
-/* camera variables*/
-extern uint16_t line[128];			// current array of raw camera data
-uint16_t smoothLine[128];	// camera data filtered by smoothing
-uint8_t	trackCenterIndex;	// camera index of the center of the track
-uint16_t trackCenterValue;	// value of the camera at the center of the track
-BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
-extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
 
-/* motor variables */
-// number from 0 to 100 that will be converted into duty cycle for motor
-int motorSpeed; 
-
-// the direction of the motor -> pin to write to i think
-enum motorDir{
-	FWD = 0,
-	REV = 1
-};
-
-
-/* steering variables*/
-// angle of wheels in degrees with 0 = straight, + right - left. used for servo
-int8_t steeringAngle; // will only go from -60 to 60
-
-
-// /* PID calling vars*/
-// int16_t trackCenterDeg;
-#ifdef USE_PID_STEERING
-// FUTURE move this out of main() if possible - maybe init func?
-// define PID vars if applicable
-// pid_tune_t steerPIDTune;
-
-
-// pid_hist_t steerPIDHist;
-
-
-// intermediate vars to provide visibility into PID actions
-float trackCenterDeg = 0.0;
-float PIDRes;
-float angleScale = 121.0/128.0;
-int16_t roughCenter;
-int16_t scaledCenter;
-int16_t iPIDRes;
-// initialize to zero deg
-#endif
-
-
-///* initialize state variables to starting values */
-//motorDir = FWD;
-//motorSpeed = NORMAL_SPEED;
-//turnAngle = 0;
-//edgeNear = 0;
 
 
 /* Milestone 1 and 2 - carpet detection and stop, bidirectional oval */
@@ -163,7 +113,6 @@ void steer_to_center(uint8_t trackCenter){
 }
 
 
-
 /**
  * @brief Initialize each component of the car
  * 
@@ -178,20 +127,12 @@ void initCarParts(void){
 	// enable the LEDs for signaling state info
 	LED1_Init();
 	LED2_Init();
+	// enable the switches for modes
+	Switch1_Init();
+	Switch2_Init();
 	// enable interrupts so the camera updates
 	EnableInterrupts();
-	
 	#ifdef USE_PID_STEERING
-	/* initializing PID structs*/
-	// // TODO tune these values - 0.5, 0.0, 0.0 is a place to start from slides
-	// steerPIDTune.kp = 0.45; // [ ] tuned kp
-	// steerPIDTune.ki = 0.2; // [ ] tuned ki
-	// steerPIDTune.kd = 0.0; // [ ] OPTIONAL tuned kd
-
-	// // initialize all of the past vars to zero as shown in slides
-	// steerPIDHist.error_n1 = 0;
-	// steerPIDHist.error_n2 = 0;
-	// steerPIDHist.setPoint_n1 = 0;
 	steering_pid_init();
 	#endif
 }
@@ -226,14 +167,93 @@ int main(void){
 	/* end OG variables*/
 
 
+	// this is the part of the track the car is on 
+	enum jeremyClarkson{
+		normal = 0,
+		straight = 1,
+		approachingTurn = 2,
+		turning = 3
+	} jeremyClarkson;
+
+	enum speedSetting{
+		reckless = 0,
+		balanced = 1,
+		conservative = 2
+	} speedSetting;
+
+	typedef struct carSettings{
+		int normalSpeed;
+		int maxSpeed;	// the absolute max speed the car will do on straights
+		int vcmThreshold; // what the car counts as the track edge
+	} carSettingsT;
+
+	/* create each of the modes*/
+	// TODO set unique high speed and VCMs for each mode
+	carSettingsT recklessMode = {HIGH_SPEED,MAX_SPEED,ON_TRACK_VCM};
+	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,ON_TRACK_VCM};
+	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, ON_TRACK_VCM};
+
+
+	// var that stores the state of the car
+	typedef struct carState{
+		// int steeringAngle;
+		// int motorSpeed;
+		enum speedSetting attackMode;
+		enum jeremyClarkson trackPosition;
+	} carStateT;
+
+	
+
+
+	#ifdef USE_PID_STEERING
+	// define PID vars if applicable
+	float trackCenterDeg = 0.0;
+	float PIDRes;
+	// intermediate vars to provide visibility into PID actions
+	float angleScale = 121.0/128.0;
+	int16_t roughCenter;
+	int16_t scaledCenter;
+	int16_t iPIDRes;
+	#endif
+
+	carStateT thisCarState;
+	thisCarState.attackMode = reckless;
+	thisCarState.trackPosition = normal; 
+	carSettingsT thisCarSettings = recklessMode;
+
 	initCarParts();
 	// infinite loop to contain logic
 	while(1){
 
+		if(Switch1_Pressed()){
+			if(thisCarState.attackMode < conservative){
+				thisCarState.attackMode ++; // go to next mode
+			} else{
+				thisCarState.attackMode = 0; // wrap around to starting mode 
+			}
+
+			switch (thisCarState.attackMode){
+				case reckless:
+					LED2_SetColor(RED);
+					thisCarSettings = recklessMode;
+					break;
+				case balanced:
+					LED2_SetColor(YELLOW);
+					thisCarSettings = balancedMode;
+					break;
+				case conservative:
+					LED2_SetColor(GREEN);
+					thisCarSettings = conservativeMode;
+				default:
+					LED2_SetColor(CYAN);
+					thisCarSettings = balancedMode;
+					break;
+			}
+		}
+
 
 		// do processing when the camera is sending data
 		if(g_sendData== TRUE){
-			LED1_On();
 			smooth_line(line,smoothLine);
 			trackCenterIndex = get_track_center(smoothLine);
 			trackCenterValue = smoothLine[trackCenterIndex];
@@ -244,30 +264,23 @@ int main(void){
 
 
 
-		// turn the sevo towards the center of the track
+		// turn the servo towards the center of the track
 		#ifndef USE_PID_STEERING
 		// just use regular steering method
 		steer_to_center(trackCenterIndex);
 		#else 
 		// use PID steering
-		
 		// // lets tell PID that positive and negative exist
 		// // convert from value between 0 and 127 to -60 to 60
-		// scaledCenter = trackCenterIndex * angleScale;
-		// trackCenterDeg = 60 - scaledCenter;
-
 		roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned lol
 		scaledCenter = roughCenter * 4;
-
-		// bound the shit 
+		// bound steering 
 		if (scaledCenter < -60){ scaledCenter = -60;}
 		if (scaledCenter > 60){ scaledCenter = 60;}
-
 		PIDRes = SteeringPID(scaledCenter);
 		iPIDRes = (int16_t) PIDRes;	
 		// steer to calculated point
 		set_steering_deg(iPIDRes);
-
 		#endif
 
 		if(carOnTrack){
@@ -304,7 +317,14 @@ int main(void){
 //	}
 //}
 
+///* initialize state variables to starting values */
+//motorDir = FWD;
+//motorSpeed = NORMAL_SPEED;
+//turnAngle = 0;
+//edgeNear = 0;
+
 /* initial concept / pseudocode to use as guidance/notes
+
 
 	if(onTrack){
 		if(edgeNear){
