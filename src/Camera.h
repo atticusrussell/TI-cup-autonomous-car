@@ -13,8 +13,9 @@
 #ifndef _CAMERA_HEADER_FILE_
 #define _CAMERA_HEADER_FILE_
 
-// the minimum camera visual mass center that is considered to be on the track
-#define ON_TRACK_VCM	(6000)
+// the minimum camera visual centrer mass that is considered to be on the track
+#define OG_ON_TRACK_VCM	(6000) // old one - too high honestly
+#define TUNING_ON_TRACK_VCM	(5000)
 
  /* Function prototypes */ 
 void INIT_Camera(void);

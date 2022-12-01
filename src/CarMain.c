@@ -196,9 +196,10 @@ int main(void){
 
 	/* create each of the modes*/
 	// TODO set unique high speed and VCMs for each mode
-	carSettingsT recklessMode = {HIGH_SPEED,MAX_SPEED,ON_TRACK_VCM};
-	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,ON_TRACK_VCM};
-	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, ON_TRACK_VCM};
+	int sharedVCM = TUNING_ON_TRACK_VCM;
+	carSettingsT recklessMode = {HIGH_SPEED,MAX_SPEED,sharedVCM};
+	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
+	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, sharedVCM};
 
 
 	// var that stores the state of the car
