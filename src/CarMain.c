@@ -156,10 +156,11 @@ void steer_to_center(uint8_t trackCenter){
 
 
 
-// NOTE we want to abstract away the hardware details in main
-int main(void){
-	// FUTURE make into its own function
-	/* Initialize each component of the car*/
+/**
+ * @brief Initialize each component of the car
+ * 
+ */
+void initCarParts(void){
 	DisableInterrupts();
 	servo_init();
 	#ifndef DISABLE_DRIVE_MOTORS
@@ -185,6 +186,13 @@ int main(void){
 	// steerPIDHist.setPoint_n1 = 0;
 	steering_pid_init();
 	#endif
+}
+
+
+
+// NOTE we want to abstract away the hardware details in main
+int main(void){
+
 
 	// infinite loop to contain logic
 	while(1){
