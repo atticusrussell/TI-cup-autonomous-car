@@ -14,12 +14,14 @@
 #define	_DC_MOTOR_HEADER_FILE_
 
 // constant params to tweak as needed
-// maximum motor duty cycle
-#define MAX_SPEED 		(65.0)
+// maximum motor duty cycle to use during straights
+#define MAX_SPEED 		(65) //NOTE untested 
 // normal forward motor duty cycle
+#define TURN_SPEED		(30)	// NOTE untested
+
+#define HIGH_SPEED		(45)	// NOTE untested
 #define NORMAL_SPEED 	(35)
-// slower motor duty cycle for turns
-#define TURN_SPEED 		(5)
+#define LOW_SPEED 		(27)	// NOTE untested
 
 // TODO function prototypes
 void stop_DC_motors(void);
