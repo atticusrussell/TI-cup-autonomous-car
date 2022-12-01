@@ -19,6 +19,15 @@
 
 #define TUNING_ON_TRACK_VCM	(3000)
 
+// track position threshold values for the camera avg magnitude VCM.
+// will be considered in the state if avg vcm is greater than the threshold
+#define THRESHOLD_STRAIGHT		(15000)
+#define THRESHOLD_NORMAL		(10000)
+#define THRESHOLD_APPROACH		(7000)
+#define THRESHOLD_TURNING		(4000)
+#define THRESHOLD_EDGE			(3500)
+
+
  /* Function prototypes */ 
 void INIT_Camera(void);
 BOOLEAN get_on_track(uint16_t maxCamVal, uint16_t onTrackThreshold);

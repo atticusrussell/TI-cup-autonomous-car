@@ -25,7 +25,10 @@
 
 #define MODE_SWITCHING
 #define CAR_ARMING
-#define ON_TRACK_LEDS
+// #define ON_TRACK_LEDS
+
+#define RACECAR_STATE_MACHINE
+#define RSM_LEDS
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
@@ -173,15 +176,19 @@ int main(void){
 	BOOLEAN carArmed = FALSE;
 	#endif
 
-	#ifdef MODE_SWITCHING
+	#ifdef RACECAR_STATE_MACHINE
 	// this is the part of the track the car is on 
 	enum jeremyClarkson{
-		normal = 0,
-		straight = 1,
+		straight = 0,
+		normal = 1,
 		approachingTurn = 2,
-		turning = 3
+		turning = 3,
+		trackEdge = 4,
+		richardHammond = 5  // off the track
 	} jeremyClarkson;
+	#endif
 
+	#ifdef MODE_SWITCHING
 	enum speedSetting{
 		reckless = 0,
 		balanced = 1,
@@ -306,6 +313,52 @@ int main(void){
 				thisCarState.magnitudeVCM = smoothLine[trackCenterIndex];
 				carOnTrack = get_on_track(thisCarState.magnitudeVCM, thisCarSettings.vcmThreshold);
 			} 
+
+			#ifdef RACECAR_STATE_MACHINE
+			// TODO maybe just end up scaling turn angle and speed based on magVCM
+			if(thisCarState.magnitudeVCM > THRESHOLD_STRAIGHT){
+				thisCarState.trackPosition = straight;
+			} else if(thisCarState.magnitudeVCM > THRESHOLD_NORMAL){
+				thisCarState.trackPosition = normal;
+			} else if(thisCarState.magnitudeVCM > THRESHOLD_APPROACH){
+				thisCarState.trackPosition = approachingTurn;
+			} else if(thisCarState.magnitudeVCM > THRESHOLD_TURNING){
+				thisCarState.trackPosition = turning;
+			} else if (thisCarState.magnitudeVCM > THRESHOLD_EDGE){
+				thisCarState.trackPosition = trackEdge;
+			} else{
+				thisCarState.trackPosition = richardHammond;
+			}
+
+			#ifdef RSM_LEDS
+			BYTE ledColor;
+			switch (thisCarState.trackPosition)
+			{
+			case straight:
+				ledColor = RED;
+				break;
+			case normal:
+				ledColor = YELLOW;
+				break;
+			case approachingTurn:
+				ledColor = GREEN;
+				break;
+			case turning:
+				ledColor = CYAN;
+				break;
+			case trackEdge:
+				ledColor = BLUE;
+				break;
+			case richardHammond:
+				ledColor = MAGENTA;
+				break;
+			
+			default:
+				break;
+			}
+			LED2_SetColor(ledColor);
+			#endif
+			#endif
 
 			// turn the servo towards the center of the track
 			#ifndef USE_PID_STEERING
