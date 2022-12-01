@@ -318,7 +318,7 @@ int main(void){
 				LED2_SetColor(GREEN);
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
-				motors_move(NORMAL_SPEED, 0);
+				motors_move(thisCarSettings.normalSpeed, FWD);
 				#endif
 				
 			} else{
