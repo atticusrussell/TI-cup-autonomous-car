@@ -16,6 +16,7 @@
 // the minimum camera visual centrer mass that is considered to be on the track
 #define OG_ON_TRACK_VCM	(6000) // old one - too high honestly
 #define TUNING_ON_TRACK_VCM	(5000)
+#define CONSERVATIVE_VCM	(5000) // this works nicely - will keep as cons.
 
  /* Function prototypes */ 
 void INIT_Camera(void);

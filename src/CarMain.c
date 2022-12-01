@@ -199,7 +199,7 @@ int main(void){
 	int sharedVCM = TUNING_ON_TRACK_VCM;
 	carSettingsT recklessMode = {HIGH_SPEED,MAX_SPEED,sharedVCM};
 	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, sharedVCM};
+	carSettingsT conservativeMode = {LOW_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
 
 
 	// var that stores the state of the car
