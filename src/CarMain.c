@@ -284,6 +284,7 @@ int main(void){
 				case conservative:
 					LED2_SetColor(BLUE);
 					thisCarSettings = conservativeMode;
+					break;
 				default:
 					LED2_SetColor(RED);
 					thisCarSettings = balancedMode;
