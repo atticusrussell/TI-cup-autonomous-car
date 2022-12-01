@@ -166,6 +166,8 @@ int main(void){
 	int8_t steeringAngle; // will only go from -60 to 60
 	/* end OG variables*/
 
+	BOOLEAN carArmed = FALSE;
+
 
 	// this is the part of the track the car is on 
 	enum jeremyClarkson{
@@ -224,6 +226,24 @@ int main(void){
 	initCarParts();
 	// infinite loop to contain logic
 	while(1){
+		if (Switch2_Pressed()){
+			/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
+			if (!carArmed){
+				BYTE prevColor = LED2_GetColor();
+				LED2_SetColor(RED);
+				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+				LED2_SetColor(YELLOW);
+				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+				LED2_SetColor(GREEN);
+				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+				LED2_SetColor(prevColor);
+				/* red LED on when car is armed*/
+				LED1_On();
+			} else{
+				LED1_Off();
+			}
+			carArmed = ~carArmed; //toggle state of the car being armed
+		}
 
 		if(Switch1_Pressed()){
 			if(thisCarState.attackMode < conservative){
@@ -234,18 +254,18 @@ int main(void){
 
 			switch (thisCarState.attackMode){
 				case reckless:
-					LED2_SetColor(RED);
+					LED2_SetColor(MAGENTA);
 					thisCarSettings = recklessMode;
 					break;
 				case balanced:
-					LED2_SetColor(YELLOW);
+					LED2_SetColor(WHITE);
 					thisCarSettings = balancedMode;
 					break;
 				case conservative:
-					LED2_SetColor(GREEN);
+					LED2_SetColor(CYAN);
 					thisCarSettings = conservativeMode;
 				default:
-					LED2_SetColor(CYAN);
+					LED2_SetColor(RED);
 					thisCarSettings = balancedMode;
 					break;
 			}
@@ -284,7 +304,6 @@ int main(void){
 		#endif
 
 		if(carOnTrack){
-			LED1_Off(); // turn off the LED if on track
 			#ifndef DISABLE_DRIVE_MOTORS
 			DC_motors_enable();
 			motors_move(NORMAL_SPEED, 0);
@@ -292,7 +311,11 @@ int main(void){
 			
 		} else{
 			//we are off the track
-			LED1_On(); // turn on red led if we are off the track
+			// FLASH LED WHITE if we off the track
+			// FUTURE  if this is too slow or not visible use interrupts+timer
+			BYTE prevColor = LED2_GetColor();
+			LED2_SetColor(BLUE); // FUTURE this will be unclear with cyan state
+			LED2_SetColor(prevColor);
 			#ifndef DISABLE_DRIVE_MOTORS
 			stop_DC_motors();
 			#endif
