@@ -25,7 +25,7 @@
 
 #define MODE_SWITCHING
 #define CAR_ARMING
-
+#define ON_TRACK_LEDS
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
@@ -326,7 +326,9 @@ int main(void){
 			#endif
 
 			if(carOnTrack){
+				#ifdef ON_TRACK_LEDS
 				LED2_SetColor(GREEN);
+				#endif
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
 				motors_move(thisCarSettings.normalSpeed, FWD);
@@ -334,7 +336,9 @@ int main(void){
 				
 			} else{
 				//we are off the track
+				#ifdef ON_TRACK_LEDS
 				LED2_SetColor(RED);
+				#endif
 				#ifndef DISABLE_DRIVE_MOTORS
 				stop_DC_motors();
 				#endif

@@ -21,8 +21,8 @@
 
 #define HIGH_SPEED		(45)	// NOTE too fast to get around corners ATM
 #define NORMAL_SPEED 	(35)
-// NOTE 27 too slow to get up the lil hill
-#define LOW_SPEED 		(30)	// NOTE works - barely gets up hill but does
+// 27 too slow to get up the lil hill
+#define LOW_SPEED 		(30)	// works - barely gets up hill but does
 
 // function prototypes
 void stop_DC_motors(void);
