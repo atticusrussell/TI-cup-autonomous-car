@@ -200,6 +200,30 @@ void initCarParts(void){
 
 // NOTE we want to abstract away the hardware details in main
 int main(void){
+	/* OG Variables*/
+	/* camera variables*/
+	extern uint16_t line[128];			// current array of raw camera data
+	uint16_t smoothLine[128];	// camera data filtered by smoothing
+	uint8_t	trackCenterIndex;	// camera index of the center of the track
+	uint16_t trackCenterValue;	// value of the camera at the center of the track
+	BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
+	extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
+
+
+	/* motor variables */
+	// number from 0 to 100 that will be converted into duty cycle for motor
+	int motorSpeed; 
+
+	// the direction of the motor -> pin to write to i think
+	enum motorDir{
+		FWD = 0,
+		REV = 1
+	};
+
+	/* steering variables*/
+	// angle of wheels in degrees with 0 = straight, + right - left. used for servo
+	int8_t steeringAngle; // will only go from -60 to 60
+	/* end OG variables*/
 
 
 	initCarParts();
