@@ -155,7 +155,7 @@ void initCarParts(void){
  * @param carArmed whether car is already armed
  * @return BOOLEAN the new armed/disarmed state
  */
-BOOLEAN checkCarArming(BOOLEAN carArmed){
+BOOLEAN checkArmingButton(BOOLEAN carArmed){
 	if (Switch2_Pressed()){
 		// wait a bit to avoid push being registered twice
 		Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
@@ -210,6 +210,8 @@ int main(void){
 		trackEdge = 4,
 		richardHammond = 5  // off the track
 	};
+
+	BYTE stateLEDColor;
 	#endif
 
 	#ifdef MODE_SWITCHING
@@ -268,7 +270,7 @@ int main(void){
 	// infinite loop to contain logic
 	while(1){
 		#ifdef CAR_ARMING
-		carArmed = checkCarArming(carArmed);
+		carArmed = checkArmingButton(carArmed);
 		#endif
 
 		#ifdef MODE_SWITCHING
@@ -338,47 +340,42 @@ int main(void){
 				carState.trackPosition = richardHammond;
 			}
 
-			// vars to modify in the switch
-			BYTE ledColor;
-			int stateSpeed;
+			
 
 			switch (carState.trackPosition){
-			case straight:
-				ledColor = RED;
-				stateSpeed = STRAIGHT_SPEED;
-				break;
-			case normal:
-				ledColor = YELLOW;
-				stateSpeed = NORMAL_SPEED;
-				break;
-			case approachingTurn:
-				ledColor = GREEN;
-				stateSpeed = APPROACH_SPEED;
-				break;
-			case turning:
-				ledColor = CYAN;
-				stateSpeed = TURNING_SPEED;
-				break;
-			case trackEdge:
-				ledColor = BLUE;
-				stateSpeed = EDGE_SPEED;
-				break;
-			case richardHammond:
-				ledColor = MAGENTA;
-				stateSpeed = HAMMOND_SPEED;
-				break;
-			
-			default:
-				break;
+				case straight:
+					stateLEDColor = RED;
+					carState.setSpeed = STRAIGHT_SPEED;
+					break;
+				case normal:
+					stateLEDColor = YELLOW;
+					carState.setSpeed = NORMAL_SPEED;
+					break;
+				case approachingTurn:
+					stateLEDColor = GREEN;
+					carState.setSpeed = APPROACH_SPEED;
+					break;
+				case turning:
+					stateLEDColor = CYAN;
+					carState.setSpeed = TURNING_SPEED;
+					break;
+				case trackEdge:
+					stateLEDColor = BLUE;
+					carState.setSpeed = EDGE_SPEED;
+					break;
+				case richardHammond:
+					stateLEDColor = MAGENTA;
+					carState.setSpeed = HAMMOND_SPEED;
+					break;
+				
+				default:
+					break;
 			}
 
 			#ifdef RSM_LEDS
-			LED2_SetColor(ledColor);
+			LED2_SetColor(stateLEDColor);
 			#endif
 
-			if(carSettings.useStateSpeed){
-				carState.setSpeed = stateSpeed;
-			}
 
 			#endif // ifdef RACECAR_STATE_MACHINE
 
