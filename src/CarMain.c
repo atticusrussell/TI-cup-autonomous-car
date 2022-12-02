@@ -92,7 +92,8 @@
 // [ ] use a scalar multiplier for the different aggression modes
 // [ ] determine which edge closer when almost off track - spin that wheel faster to get back on 
 // [ ] convert to follow C best practices from IDE handbook
-// NOTE 0.45 highest DC for motors that won't blow them up
+// NOTE i heard "0.45 highest DC for motors that won't blow them up"
+//	even if that's not true it may be the highest sensible setting
 
 // very optional
 // FUTURE distance to the edge if we know it/ can find it
@@ -145,6 +146,38 @@ void initCarParts(void){
 	#endif
 }
 
+
+/**
+ * @brief Checks to see if arming button pressed and arm/disarm accordingly. Sets LEDs also
+ * 
+ * @note if unarmed->armed does a countdown with red->YLW->grn and arms
+ * @note LED1 is off if armed, and on when not
+ * @param carArmed whether car is already armed
+ * @return BOOLEAN the new armed/disarmed state
+ */
+BOOLEAN checkCarArming(BOOLEAN carArmed){
+	if (Switch2_Pressed()){
+		// wait a bit to avoid push being registered twice
+		Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
+		/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
+		if (!carArmed){
+			BYTE prevColor = LED2_GetColor();
+			LED2_SetColor(RED);
+			Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+			LED2_SetColor(YELLOW);
+			Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+			LED2_SetColor(GREEN);
+			Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
+			LED2_SetColor(prevColor);
+			/* red LED on when car is armed*/
+			LED1_On();
+		} else{
+			LED1_Off();
+		}
+		carArmed = ~carArmed; //toggle state of the car being armed
+	}
+	return carArmed;
+}
 
 
 // NOTE we want to abstract away the hardware details in main
@@ -223,11 +256,12 @@ int main(void){
 	};
 
 
-
+	/* instantiate carState and decide how car should default*/
 	struct carStateStruct carState;
 	carState.attackMode = reckless; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
-	carState.trackPosition = normal; 
+	carState.trackPosition = normal;
+	/* instantiate carSettings and choose the default*/
 	struct carSettingsStruct carSettings = recklessMode;
 	#endif
 
@@ -246,26 +280,7 @@ int main(void){
 	// infinite loop to contain logic
 	while(1){
 		#ifdef CAR_ARMING
-		if (Switch2_Pressed()){
-			// wait a bit to avoid push being registered twice
-			Clock_Delay_n_ms(1000,HIGH_CLOCK_SPEED);	
-			/*  if car is going from disarmed to armed, do a countdown to go using the LEDs and then resume indicating the current state*/
-			if (!carArmed){
-				BYTE prevColor = LED2_GetColor();
-				LED2_SetColor(RED);
-				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
-				LED2_SetColor(YELLOW);
-				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
-				LED2_SetColor(GREEN);
-				Clock_Delay_n_ms(500,HIGH_CLOCK_SPEED); // half a second delay
-				LED2_SetColor(prevColor);
-				/* red LED on when car is armed*/
-				LED1_On();
-			} else{
-				LED1_Off();
-			}
-			carArmed = ~carArmed; //toggle state of the car being armed
-		}
+		carArmed = checkCarArming(carArmed);
 		#endif
 
 		#ifdef MODE_SWITCHING
