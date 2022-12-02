@@ -198,9 +198,9 @@ int main(void){
 		conservative = 2
 	};
 
-	struct carSettings{
+	struct carSettingsStruct{
 		int normalSpeed;
-		int maxSpeed;	// the absolute max speed the car will do on straights
+		int maxSpeed;	// the absolute max speed the car will do on straights //TODO remove this probably or switch it for a scalar
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useStateSpeed; // whether to use statespeed
 	};
@@ -208,13 +208,13 @@ int main(void){
 	/* create each of the modes*/
 	// TODO set unique high speed and VCMs for each mode
 	int sharedVCM = TUNING_ON_TRACK_VCM;
-	struct carSettings recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,TRUE};
-	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,FALSE};
-	struct carSettings conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
+	struct carSettingsStruct recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,TRUE};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,FALSE};
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
 
 
 	// var that stores the state of the car
-	struct carState{
+	struct carStateStruct{
 		// int steeringAngle;
 		// int motorSpeed;
 		enum speedSetting attackMode;
@@ -225,11 +225,11 @@ int main(void){
 
 
 
-	struct carState thisCarState;
-	thisCarState.attackMode = reckless; //choose the starting mode
+	struct carStateStruct carState;
+	carState.attackMode = reckless; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
-	thisCarState.trackPosition = normal; 
-	struct carSettings thisCarSettings = recklessMode;
+	carState.trackPosition = normal; 
+	struct carSettingsStruct carSettings = recklessMode;
 	#endif
 
 	#ifdef USE_PID_STEERING
@@ -273,35 +273,35 @@ int main(void){
 		if(Switch1_Pressed()){
 			// wait a bit to avoid push being registered twice
 			Clock_Delay_n_ms(300,HIGH_CLOCK_SPEED);	
-			if(thisCarState.attackMode == reckless){
-				thisCarState.attackMode = balanced; // go to next mode
-			} else if(thisCarState.attackMode == balanced){
-				thisCarState.attackMode = conservative; 
+			if(carState.attackMode == reckless){
+				carState.attackMode = balanced; // go to next mode
+			} else if(carState.attackMode == balanced){
+				carState.attackMode = conservative; 
 			} else{
 				// wrap around to starting mode 
-				thisCarState.attackMode = reckless;
+				carState.attackMode = reckless;
 			}
 			modeLEDUpdated = FALSE; //need to update mode LED
 		}
 
 		// updates LED2 color based on mode selected
 		if (!modeLEDUpdated){
-			switch (thisCarState.attackMode){
+			switch (carState.attackMode){
 				case reckless:
 					LED2_SetColor(MAGENTA);
-					thisCarSettings = recklessMode;
+					carSettings = recklessMode;
 					break;
 				case balanced:
 					LED2_SetColor(WHITE);
-					thisCarSettings = balancedMode;
+					carSettings = balancedMode;
 					break;
 				case conservative:
 					LED2_SetColor(BLUE);
-					thisCarSettings = conservativeMode;
+					carSettings = conservativeMode;
 					break;
 				default:
 					LED2_SetColor(RED);
-					thisCarSettings = balancedMode;
+					carSettings = balancedMode;
 					break;
 			}
 			modeLEDUpdated = TRUE;
@@ -315,31 +315,31 @@ int main(void){
 			if(g_sendData== TRUE){
 				smooth_line(line,smoothLine);
 				trackCenterIndex = get_track_center(smoothLine);
-				thisCarState.magnitudeVCM = smoothLine[trackCenterIndex];
-				carOnTrack = get_on_track(thisCarState.magnitudeVCM, thisCarSettings.vcmThreshold);
+				carState.magnitudeVCM = smoothLine[trackCenterIndex];
+				carOnTrack = get_on_track(carState.magnitudeVCM, carSettings.vcmThreshold);
 			} 
 
 			#ifdef RACECAR_STATE_MACHINE
 			// TODO maybe just end up scaling turn angle and speed based on magVCM
-			if(thisCarState.magnitudeVCM > THRESHOLD_STRAIGHT){
-				thisCarState.trackPosition = straight;
-			} else if(thisCarState.magnitudeVCM > THRESHOLD_NORMAL){
-				thisCarState.trackPosition = normal;
-			} else if(thisCarState.magnitudeVCM > THRESHOLD_APPROACH){
-				thisCarState.trackPosition = approachingTurn;
-			} else if(thisCarState.magnitudeVCM > THRESHOLD_TURNING){
-				thisCarState.trackPosition = turning;
-			} else if (thisCarState.magnitudeVCM > THRESHOLD_EDGE){
-				thisCarState.trackPosition = trackEdge;
+			if(carState.magnitudeVCM > THRESHOLD_STRAIGHT){
+				carState.trackPosition = straight;
+			} else if(carState.magnitudeVCM > THRESHOLD_NORMAL){
+				carState.trackPosition = normal;
+			} else if(carState.magnitudeVCM > THRESHOLD_APPROACH){
+				carState.trackPosition = approachingTurn;
+			} else if(carState.magnitudeVCM > THRESHOLD_TURNING){
+				carState.trackPosition = turning;
+			} else if (carState.magnitudeVCM > THRESHOLD_EDGE){
+				carState.trackPosition = trackEdge;
 			} else{
-				thisCarState.trackPosition = richardHammond;
+				carState.trackPosition = richardHammond;
 			}
 
 			// vars to modify in the switch
 			BYTE ledColor;
 			int stateSpeed;
 
-			switch (thisCarState.trackPosition)
+			switch (carState.trackPosition)
 			{
 			case straight:
 				ledColor = RED;
@@ -375,7 +375,7 @@ int main(void){
 			#endif
 
 			#ifdef RSM_SPEED // should be a boolean
-			thisCarState.setSpeed = stateSpeed;
+			carState.setSpeed = stateSpeed;
 			#endif
 
 			#endif // ifdef RACECAR_STATE_MACHINE
@@ -407,9 +407,9 @@ int main(void){
 				DC_motors_enable();
 
 				#ifndef RSM_SPEED //TODO this should be a boolean
-				motors_move(thisCarSettings.normalSpeed, FWD);
+				motors_move(carSettings.normalSpeed, FWD);
 				#else
-				motors_move(thisCarState.setSpeed,FWD);
+				motors_move(carState.setSpeed,FWD);
 				#endif 
 
 				#endif //ifndef DISABLE_DRIVE_MOTORS
