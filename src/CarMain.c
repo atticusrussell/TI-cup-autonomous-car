@@ -111,14 +111,15 @@
  * @brief steers the servo to the center of the track
  * 
  * @param trackCenter a number from 1 to 128 that indicates the track center
+ * @return 
  */
-void steer_to_center(uint8_t trackCenter){
+int8_t steer_to_center(uint8_t trackCenter){
 	int8_t steerAng;	// ang deg center of car to center of track
 	// if less than 64 will be negative and left, otherwise pos and right
 	steerAng = 64 - trackCenter;
 	// 64 is close enough to 60. 
 	// if it is greater than 60 or less than -60 bounding func will catch
-	set_steering_deg(steerAng*TURN_INCREMENT);
+	return set_steering_deg(steerAng*TURN_INCREMENT);
 }
 
 
@@ -237,7 +238,7 @@ int main(void){
 	// var that stores the state of the car
 	struct carStateStruct{
 		/* angle of wheels in deg with 0 = straight, + right - left.for servo */
-		// int8_T steeringAngle; // will only go from -60 to 60
+		int8_t steeringAngle; // will only go from -60 to 60
 		/* number from 0 to 100 to be converted into duty cycle for motor*/
 		// int motorSpeed;
 		enum speedSetting attackMode;
@@ -251,6 +252,7 @@ int main(void){
 	carState.attackMode = reckless; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
 	carState.trackPosition = normal;
+	carState.steeringAngle = 0; // start straight ahead
 	/* instantiate carSettings and choose the default*/
 	struct carSettingsStruct carSettings = recklessMode;
 	#endif
@@ -382,7 +384,7 @@ int main(void){
 			// turn the servo towards the center of the track
 			#ifndef USE_PID_STEERING
 			// just use regular steering method
-			steer_to_center(trackCenterIndex);
+			carState.steeringAngle = steer_to_center(trackCenterIndex);
 			#else 
 			// use PID steering
 			// // lets tell PID that positive and negative exist
@@ -395,7 +397,7 @@ int main(void){
 			PIDRes = SteeringPID(scaledCenter);
 			iPIDRes = (int16_t) PIDRes;	
 			// steer to calculated point
-			set_steering_deg(iPIDRes);
+			carState.steeringAngle =  set_steering_deg(iPIDRes);
 			#endif
 
 			if(carOnTrack){

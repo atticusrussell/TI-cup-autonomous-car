@@ -126,8 +126,9 @@ int ibound_steering_angle(int steeringAngle){
  * 
  * @param steeringAngle an angle in degrees to set the steering. -left, +right
  * @note using int for now - //FUTURE convert to float if more precision needed
+ * @return (bounded) angle in degrees that the steering was actually sent to
  */
-void set_steering_deg(int16_t steeringAngle){
+int8_t set_steering_deg(int16_t steeringAngle){
 	// make sure that it is within the correct bounds
 	steeringAngle = ibound_steering_angle(steeringAngle);
 	/* A 1.5ms pulse says do not turn at all
@@ -137,6 +138,7 @@ void set_steering_deg(int16_t steeringAngle){
 	// 1.5 + ( +-1)*(value from 60 to 60)*(0.5/60)
 	double servoPulse= 1.5 +  (steeringAngle * oneDegDC);
 	set_servo_pulse(servoPulse);
+	return steeringAngle;
 }
 
 // // NOTE comment out from here to end of tile if not testing servo alone.
