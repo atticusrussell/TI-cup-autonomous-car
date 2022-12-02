@@ -520,7 +520,7 @@ int main(void){
 			// NOTE actual calls to movement here
 			#ifndef NO_BRAKES
 			if(carOnTrack){  
-			#endif
+			#endif // ifndef NO_BRAKES
 				DC_motors_enable();
 				// determine baseline speed
 				if(carSettings.useSpeedScale){
@@ -539,10 +539,9 @@ int main(void){
 			#ifndef NO_BRAKES
 			} else{
 				//we are off the track
-				
 				stop_DC_motors();
 			}
-			#endif
+			#endif // ifndef NO_BRAKES
 		#ifdef CAR_ARMING
 		} else{
 			stop_DC_motors();
