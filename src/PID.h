@@ -10,26 +10,18 @@
 #ifndef _PID_HEADER_FILE_
 #define _PID_HEADER_FILE_
 
+//TODO tune me
+// HACK try next 0.05, 0.025, 0.045
 #define KP_STEER (0.5)
 #define KI_STEER (0.3)
 #define KD_STEER (0.0)
 
-// typedef struct pid_tune{
-// 	float kp;
-// 	float ki;
-// 	float kd;
-// } pid_tune_t;
-
-// typedef struct pid_hist{
-// 	float error_n1;		// last error
-// 	float error_n2; 		// two errors ago
-// 	float setPoint_n1;	// last setpoint 
-// } pid_hist_t;
+#define PID_STEERING_ERROR_ENTRIES	(3) //TODO tune me
 
 
 // /* Function prototypes */
 // float ReusePID(pid_tune_t pidTune, pid_hist_t* pidHist_p, float current, float intended);
 void	steering_pid_init(void);
-float SteeringPID(float intended);
+float SteeringPID(float intended, float actual);
 
  #endif

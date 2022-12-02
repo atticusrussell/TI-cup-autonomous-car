@@ -45,11 +45,11 @@
 
 #define SPEED_SCALE_VCM_DIVISOR (7000)
 
-// #define SCALAR_SPEED_ADJ (1.1)
-
 // #define MIN_TURN_SPEED 25
 
 // #define NO_BRAKES
+
+/* PID stuff */
 
 
 
@@ -100,19 +100,26 @@
 // [x] when in edge state turn the servo to its max 
 // [x] implement differential drive for sharper turning - esp. near edge
 // [x] make servo steering less twitchy with adjusted camera
-// [x] configure Timer32_2 to run in one-shot mode
-// [x] figure out how to use generated interrupt to stop the car
-// [ ] implement it
-// NOTE even without onTrack detection turned on it still stops - param adjust
-// [ ] I NEED PID - TUNE IT because I need to use the error history
+// [x] test differential steering
+// [x] tune differential steering
 
-// [ ] tie "off track" to RSM 
-// [ ] with adjusted camera keep history of center and detect off track based on that
+// [x] I NEED PID - TUNE IT because I need to use the error history
+// [ ] test and tune PID for reckless mode
+
+
 // [ ] create "data lost" state below a certain VCM where you stop updating values and just move the car
 // [ ] when go "off track" keep going with historical servo angle
+// [x] configure Timer32_2 to run in one-shot mode
+// [x] figure out how to use generated interrupt to stop the car delayed 
+// [ ] implement it well 
+// NOTE even without onTrack detection turned on it still stops - param adjust
 
-// [ ] test differential steering
-// [ ] tune differential steering
+
+
+// [ ] create error history
+// [ ] tie "off track" to RSM 
+// [ ] with adjusted camera keep history of center and detect off track based on that
+
 // [ ] test different modes and optimize
 
 // optional/ideas
@@ -133,21 +140,43 @@ enum motorDir{ // the direction of the motor
 	REV = 1
 };
 
+// // needs to be global because accessed by many functions and
+// double steerPIDErrHistArray[PID_STEERING_ERROR_ENTRIES];
+
+
 
 
 /**
  * @brief steers the servo to the center of the track
  * 
- * @param trackCenter a number from 1 to 128 that indicates the track center
+ * @param trackCenterIndex number from 1 to 128 that indicates the track center
  * @return 
  */
-int8_t steer_to_center(uint8_t trackCenter, double steerScalar){
-	int8_t steerAng;	// ang deg center of car to center of track
-	// if less than 64 will be negative and left, otherwise pos and right
-	steerAng = 64 - trackCenter;
+int8_t steer_to_center(uint8_t trackCenterIndex, double steerScalar, BOOLEAN usePIDServo){
+	/* ang deg center of car to center of track. if less than 64 will be negative and left, otherwise pos and right */
 	// 64 is close enough to 60. 
+	int8_t unscaledSteerAng = 64 - trackCenterIndex;
+	// run through trusty proportion
+	double scaledUnboundedSteeringAng = unscaledSteerAng*steerScalar;
 	// if it is greater than 60 or less than -60 bounding func will catch
-	return set_steering_deg(steerAng*steerScalar);
+	double scaledSteeringAng = fbound_steering_angle(scaledUnboundedSteeringAng);
+	//NOTE - ^ this is a change - if non-PID steering becomes bad undo it 
+
+	if(usePIDServo){
+	double straightAheadDeg = 0.0;
+		// use PID steering
+		// TODO implement PID call here
+		// NOTE maybe just use steerScalar as kp
+		// TODO consider only returning the non-PID val if things don't work
+		// intermediate var for visibility
+		double PIDRes = SteeringPID(straightAheadDeg ,scaledSteeringAng);
+		// steer to calculated point - cast to int
+		return set_steering_deg((int16_t) PIDRes);
+		
+	} else{
+		// if not using PID - just set steering to angle calculated
+		return set_steering_deg(scaledSteeringAng);
+	}
 }
 
 
@@ -249,7 +278,6 @@ int main(void){
 	extern uint16_t line[128];			// current array of raw camera data
 	uint16_t smoothLine[128];	// camera data filtered by smoothing
 	uint8_t	trackCenterIndex;	// camera index of the center of the track
-	//uint16_t trackCenterValue;	// value of the camera at center of track
 	BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
 	extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
@@ -287,12 +315,13 @@ int main(void){
 		BOOLEAN useDiffThrust;
 		double steeringScalar;
 		BOOLEAN enableHeadless;
+		BOOLEAN usePIDServo;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE};
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE, TRUE};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE, FALSE};
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE, FALSE};
 
 	// var that stores the state of the car
 	struct carStateStruct{
@@ -313,27 +342,14 @@ int main(void){
 	carState.steeringAngle = 0; // start straight ahead
 	/* instantiate carSettings and choose the default*/
 	struct carSettingsStruct carSettings = recklessMode;
-	#endif
+	#endif // MODE_SWITCHING
 
-	#ifdef USE_PID_STEERING
-	// TODO make pid steering struct
-	// define PID vars if applicable
-	float trackCenterDeg = 0.0;
-	float PIDRes;
-	// intermediate vars to provide visibility into PID actions
-	float angleScale = 121.0/128.0;
-	int16_t roughCenter;
-	int16_t scaledCenter;
-	int16_t iPIDRes;
-	#endif
 
-	/* differential steering*/
-	// TODO make struct diffsteering
+	/* differential thrust*/
 	double desiredSpeed;
-	
 
-
-	double speedFactor = 1.0; //silly initialized val
+	/* speed scale (initialize to harmless value of 1)*/
+	double speedFactor = 1.0; 
 
 
 	/* vars to handle losing VCM but not being all the way off the track*/
@@ -455,23 +471,7 @@ int main(void){
 			} else{
 			#endif // RSM_EVASIVE_MAN
 				// turn the servo towards the center of the track
-				#ifndef USE_PID_STEERING
-				// just use regular steering method
-				carState.steeringAngle = steer_to_center(trackCenterIndex, carSettings.steeringScalar);
-				#else 
-				// use PID steering
-				// // lets tell PID that positive and negative exist
-				// // convert from value between 0 and 127 to -60 to 60
-				roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned
-				scaledCenter = roughCenter * 4;
-				// bound steering 
-				if (scaledCenter < -60){ scaledCenter = -60;}
-				if (scaledCenter > 60){ scaledCenter = 60;}
-				PIDRes = SteeringPID(scaledCenter);
-				iPIDRes = (int16_t) PIDRes;	
-				// steer to calculated point
-				carState.steeringAngle =  set_steering_deg(iPIDRes);
-				#endif
+				carState.steeringAngle = steer_to_center(trackCenterIndex, carSettings.steeringScalar, carSettings.usePIDServo);
 			#ifdef RSM_EVASIVE_MAN
 			}
 			#endif // RSM_EVASICE_MAN
