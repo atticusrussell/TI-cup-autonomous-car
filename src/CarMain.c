@@ -198,18 +198,19 @@ int main(void){
 		conservative = 2
 	} speedSetting;
 
-	typedef struct carSettings{
+	struct carSettings{
 		int normalSpeed;
 		int maxSpeed;	// the absolute max speed the car will do on straights
 		int vcmThreshold; // what the car counts as the track edge
-	} carSettingsT;
+		BOOLEAN useStateSpeed; // whether to use statespeed
+	};
 
 	/* create each of the modes*/
 	// TODO set unique high speed and VCMs for each mode
 	int sharedVCM = TUNING_ON_TRACK_VCM;
-	carSettingsT recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	carSettingsT balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	carSettingsT conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
+	struct carSettings recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
+	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
+	struct carSettings conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
 
 
 	// var that stores the state of the car
@@ -228,7 +229,7 @@ int main(void){
 	thisCarState.attackMode = reckless; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
 	thisCarState.trackPosition = normal; 
-	carSettingsT thisCarSettings = recklessMode;
+	struct carSettings thisCarSettings = recklessMode;
 	#endif
 
 	#ifdef USE_PID_STEERING
