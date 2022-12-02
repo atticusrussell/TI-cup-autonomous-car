@@ -7,7 +7,7 @@
 */
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // abs() function
 #include "msp.h"
 #include "uart.h"
 #include "Common.h"
@@ -16,9 +16,10 @@
 #include "CortexM.h"
 #include "Camera.h"
 #include	"LEDs.h"
-#include "ControlPins.h"
+#include "ControlPins.h" // camera
 #include "PID.h"
-#include "switches.h"
+#include "switches.h" // mode switching
+#include "Timer32.h" // one-shot timer for off-track
 
 /* commentable defines to control functionality */
 // #define USE_PID_STEERING
@@ -94,6 +95,10 @@
 // [x] when in edge state turn the servo to its max 
 // [x] implement differential drive for sharper turning - esp. near edge
 // [x] make servo steering less twitchy with adjusted camera
+// [x] configure Timer32_2 to run in one-shot mode
+// [x] figure out how to use generated interrupt to stop the car
+// [ ] implement it
+
 // [ ] tie "off track" to RSM 
 // [ ] with adjusted camera keep history of center and detect off track based on that
 // [ ] create "data lost" state below a certain VCM where you stop updating values and just move the car
@@ -110,16 +115,10 @@
 // NOTE i heard "0.45 highest DC for motors that won't blow them up"
 //	even if that's not true it may be the highest sensible setting
 
-// very optional
-// FUTURE distance to the edge if we know it/ can find it
-// if edge has been detected near car (or maybe just at all - tbd )
-//BOOLEAN edgeNear;
-// edge direction: -1 left, 1 is right, 0 straight ahead (we'll turn left 0)
-//signed int edgeDir;
 
-
-
-
+/* global variables and justifications*/
+// needs to be global because accessed by IRQ function
+	BOOLEAN headlessModeActive = FALSE;
 
 
 /**
@@ -196,6 +195,15 @@ BOOLEAN checkArmingButton(BOOLEAN carArmed){
 }
 
 
+/**
+ * @brief called by the Timer32 IRQ after it expires - stops the car
+ * 
+ */
+void endHeadlessMode(void){
+	headlessModeActive = FALSE;
+}
+
+
 int main(void){
 	/* camera variables*/
 	extern uint16_t line[128];			// current array of raw camera data
@@ -243,12 +251,13 @@ int main(void){
 		BOOLEAN useSpeedScale; // whether to use statespeed
 		BOOLEAN useDiffSteering;
 		double steeringScalar;
+		BOOLEAN enableHeadless;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR };
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, TRUE};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE};
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE};
 
 	// var that stores the state of the car
 	struct carStateStruct{
@@ -291,8 +300,17 @@ int main(void){
 	int absAngle;
 
 
-	// BOOLEAN useSpeedScale = TRUE;
-	double speedFactor = 1.0;
+	double speedFactor = 1.0; //silly initialized val
+
+
+	/* vars to handle losing VCM but not being all the way off the track*/
+	// make struct lol
+	// make instance of carStateStruct that will contain last state
+	struct carStateStruct  lastCarState;
+	int msHeadlessChicken = 300 ; // amount of time it will continue with last data before cutting off
+	
+	BOOLEAN onTrackBuffer;
+	
 
 	initCarParts();
 	// infinite loop to contain logic
@@ -316,6 +334,7 @@ int main(void){
 			modeLEDUpdated = FALSE; //need to update mode LED
 		}
 
+		// TODO make into a function
 		// updates LED2 color based on mode selected
 		if (!modeLEDUpdated){
 			switch (carState.attackMode){
@@ -348,10 +367,11 @@ int main(void){
 				smooth_line(line,smoothLine);
 				trackCenterIndex = get_track_center(smoothLine);
 				carState.magnitudeVCM = smoothLine[trackCenterIndex];
-				carOnTrack = get_on_track(carState.magnitudeVCM, carSettings.vcmThreshold);
+				onTrackBuffer = get_on_track(carState.magnitudeVCM, carSettings.vcmThreshold);
 			} 
 
 			#ifdef RACECAR_STATE_MACHINE
+			// TODO make into a function
 			if(carState.magnitudeVCM > THRESHOLD_STRAIGHT){
 				carState.trackPosition = straight;
 			} else if(carState.magnitudeVCM > THRESHOLD_NORMAL){
@@ -367,6 +387,7 @@ int main(void){
 				carState.trackPosition = richardHammond;
 			}
 
+			// TODO make into a function
 			switch (carState.trackPosition){
 				case straight:
 					stateLEDColor = RED;
@@ -396,10 +417,6 @@ int main(void){
 				default:
 					break;
 			}
-
-
-
-
 			#ifdef RSM_LEDS
 			LED2_SetColor(stateLEDColor);
 			#endif // ifdef RSM_LEDS
@@ -439,12 +456,35 @@ int main(void){
 			carState.setSpeed = carSettings.normalSpeed * speedFactor;
 			}
 
-			if(carOnTrack){
-				#ifdef ON_TRACK_LEDS //TODO swap to #ifndef RACECAR_STATE_MACHINE and then implement this identical functionality in RSM too
-				LED2_SetColor(GREEN);
-				#endif
 
-				#ifndef DISABLE_DRIVE_MOTORS
+			// NOTE WORK IN PROGRESS
+			/* figure out headless and carOnTrack */
+			if(carSettings.enableHeadless){
+				if(headlessModeActive){
+				// do headless stuff
+				carState = lastCarState;
+
+				} else{
+					// not headless mode
+					if(onTrackBuffer){
+						// if not headless mode and on track
+						// only update carOnTrack if headless mode not active
+						carOnTrack = onTrackBuffer;
+						
+						// update lastcarstate
+						lastCarState = carState;
+						/* FUTURE if lastCarState tests pointed wrong - array of them and access a prev. */
+					}else{
+						/* not already in headless mode but "off track" */
+						// start the timer to run with current settings for a time
+						Timer32_2_Init(*endHeadlessMode, msHeadlessChicken, T32DIV1);
+						headlessModeActive = TRUE;
+					}
+				}
+			}
+		
+
+			if(carOnTrack){  
 				DC_motors_enable();
 				// Differential steering
 				if(carSettings.useDiffSteering){
@@ -460,7 +500,6 @@ int main(void){
 
 					}else{
 					innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
-					 //(carState.setSpeed/35); // also scale based on speed
 					outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
 					}
 
@@ -482,18 +521,9 @@ int main(void){
 						motors_move(carSettings.normalSpeed, FWD);
 					}
 				}
-				#endif //ifndef DISABLE_DRIVE_MOTORS
-				
 			} else{
 				//we are off the track
-				// TODO set delay of 0.1 seconds before we kill power
-				// TODO
-				#ifdef ON_TRACK_LEDS
-				LED2_SetColor(RED);
-				#endif
-				#ifndef DISABLE_DRIVE_MOTORS
 				stop_DC_motors();
-				#endif
 			}
 		#ifdef CAR_ARMING
 		} else{
