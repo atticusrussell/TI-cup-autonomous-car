@@ -180,32 +180,21 @@ BOOLEAN checkCarArming(BOOLEAN carArmed){
 }
 
 
-// NOTE we want to abstract away the hardware details in main
 int main(void){
-	/* OG Variables*/
 	/* camera variables*/
 	extern uint16_t line[128];			// current array of raw camera data
 	uint16_t smoothLine[128];	// camera data filtered by smoothing
 	uint8_t	trackCenterIndex;	// camera index of the center of the track
-	//uint16_t trackCenterValue;	// value of the camera at the center of the track
+	//uint16_t trackCenterValue;	// value of the camera at center of track
 	BOOLEAN 	carOnTrack;			// true if car is on the track, otherwise false
 	extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
-
-	/* motor variables */
-	// number from 0 to 100 that will be converted into duty cycle for motor
-	// int motorSpeed; 
 
 	// the direction of the motor -> pin to write to i think
 	enum motorDir{
 		FWD = 0,
 		REV = 1
 	};
-
-	/* steering variables*/
-	// angle of wheels in degrees with 0 = straight, + right - left. used for servo
-	// int8_t steeringAngle; // will only go from -60 to 60
-	/* end OG variables*/
 
 	#ifdef CAR_ARMING
 	BOOLEAN carArmed = FALSE;
@@ -232,29 +221,28 @@ int main(void){
 
 	struct carSettingsStruct{
 		int normalSpeed;
-		int maxSpeed;	// the absolute max speed the car will do on straights //TODO remove this probably or switch it for a scalar
+		//TODO remove this probably or switch it for a scalar to * speed by
+		int maxSpeed;	// the absolute max speed the car will do on straights 
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useStateSpeed; // whether to use statespeed
 	};
 
 	/* create each of the modes*/
-	// TODO set unique high speed and VCMs for each mode
-	int sharedVCM = TUNING_ON_TRACK_VCM;
-	struct carSettingsStruct recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,TRUE};
+	struct carSettingsStruct recklessMode = {NORMAL_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE};
 	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,FALSE};
 	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
 
-
 	// var that stores the state of the car
 	struct carStateStruct{
-		// int steeringAngle;
+		/* angle of wheels in deg with 0 = straight, + right - left.for servo */
+		// int8_T steeringAngle; // will only go from -60 to 60
+		/* number from 0 to 100 to be converted into duty cycle for motor*/
 		// int motorSpeed;
 		enum speedSetting attackMode;
 		enum jeremyClarkson trackPosition;
-		int setSpeed; //the speed that the car is momentarily set to
+		int setSpeed; //the speed that the car is currently set to
 		int16_t magnitudeVCM; // value of the camera at the center of the track
 	};
-
 
 	/* instantiate carState and decide how car should default*/
 	struct carStateStruct carState;
@@ -354,8 +342,7 @@ int main(void){
 			BYTE ledColor;
 			int stateSpeed;
 
-			switch (carState.trackPosition)
-			{
+			switch (carState.trackPosition){
 			case straight:
 				ledColor = RED;
 				stateSpeed = STRAIGHT_SPEED;
