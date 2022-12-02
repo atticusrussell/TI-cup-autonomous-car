@@ -93,7 +93,11 @@
 // [x] swap the RSM_SPEED to a boolean and use it only for reckless mode
 // [x] when in edge state turn the servo to its max 
 // [x] implement differential drive for sharper turning - esp. near edge
-// [ ] make servo steering less twitchy with adjusted camera
+// [x] make servo steering less twitchy with adjusted camera
+// [ ] tie "off track" to RSM 
+// [ ] with adjusted camera keep history of center and detect off track based on that
+// [ ] create "data lost" state below a certain VCM where you stop updating values and just move the car
+// [ ] when go "off track" keep going with historical servo angle
 
 // [ ] test differential steering
 // [ ] tune differential steering
@@ -235,8 +239,6 @@ int main(void){
 
 	struct carSettingsStruct{
 		int normalSpeed;
-		//TODO remove this probably or switch it for a scalar to * speed by
-		int maxSpeed;	// the absolute max speed the car will do on straights 
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useSpeedScale; // whether to use statespeed
 		BOOLEAN useDiffSteering;
@@ -244,18 +246,17 @@ int main(void){
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR };
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR };
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR};
 
 	// var that stores the state of the car
 	struct carStateStruct{
 		/* angle of wheels in deg with 0 = straight, + right - left.for servo */
 		int8_t steeringAngle; // will only go from -60 to 60
-		/* number from 0 to 100 to be converted into duty cycle for motor*/
-		// int motorSpeed;
 		enum speedSetting attackMode;
 		enum jeremyClarkson trackPosition;
+		/* number from 0 to 100 to be converted into duty cycle for motor*/
 		int setSpeed; //the speed that the car is currently set to
 		int16_t magnitudeVCM; // value of the camera at the center of the track
 	};
@@ -271,6 +272,7 @@ int main(void){
 	#endif
 
 	#ifdef USE_PID_STEERING
+	// TODO make pid steering struct
 	// define PID vars if applicable
 	float trackCenterDeg = 0.0;
 	float PIDRes;
@@ -350,7 +352,6 @@ int main(void){
 			} 
 
 			#ifdef RACECAR_STATE_MACHINE
-			// TODO maybe just end up scaling turn angle and speed based on magVCM
 			if(carState.magnitudeVCM > THRESHOLD_STRAIGHT){
 				carState.trackPosition = straight;
 			} else if(carState.magnitudeVCM > THRESHOLD_NORMAL){

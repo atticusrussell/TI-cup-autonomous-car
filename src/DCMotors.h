@@ -18,18 +18,10 @@
 #define MAX_SPEED 		(65) //NOTE untested 
 // normal forward motor duty cycle
 
-#define STRAIGHT_SPEED		(45)
-#define NORMAL_SPEED 		(35) // DONT CHANGE  THIS WORKS VCM 3000 
-#define APPROACH_SPEED		(35)	// NOTE too fast to get around corners ATM
-#define TURNING_SPEED		(30)	// NOTE untested
-#define EDGE_SPEED			(27)
-#define HAMMOND_SPEED		(25)
-
-
-#define RECKLESS_SPEED		(40)
-
+#define RECKLESS_SPEED		(45)
+#define NORMAL_SPEED 		(40) // DONT CHANGE  THIS WORKS VCM 3000 
 // 27 too slow to get up the lil hill
-#define CONSERVATIVE_SPEED 		(30)	// works - barely gets up hill but does
+#define CONSERVATIVE_SPEED 		(35)	// works - barely gets up hill but does
 
 // function prototypes
 void stop_DC_motors(void);
