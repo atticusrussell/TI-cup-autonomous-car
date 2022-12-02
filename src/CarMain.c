@@ -238,12 +238,13 @@ int main(void){
 		int maxSpeed;	// the absolute max speed the car will do on straights 
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useSpeedScale; // whether to use statespeed
+		BOOLEAN useDiffSteering;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE};
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE,TRUE};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE,TRUE};
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE, FALSE};
 
 	// var that stores the state of the car
 	struct carStateStruct{
@@ -278,16 +279,13 @@ int main(void){
 	int16_t iPIDRes;
 	#endif
 
-	#ifdef DIFFERENTIAL_STEERING
+	/* differential steering*/
+	// TODO make struct diffsteering
 	int innerWheelSpeed;
 	int outerWheelSpeed;
-	const int smallTurn = 20;
-	const int largeTurn = 40;
 	int baseSpeed;
-
 	int absAngle;
 
-	#endif //DIFFERENTIAL_STEERING
 
 	// BOOLEAN useSpeedScale = TRUE;
 	double speedFactor = 1.0;
@@ -445,38 +443,34 @@ int main(void){
 
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
-				#ifdef DIFFERENTIAL_STEERING
-				
-				absAngle = abs(carState.steeringAngle);
+				if(carSettings.useDiffSteering){
+					absAngle = abs(carState.steeringAngle);
 
-				if(carSettings.useSpeedScale){
-					baseSpeed = carState.setSpeed;
+					if(carSettings.useSpeedScale){
+						baseSpeed = carState.setSpeed;
+					} else{
+						baseSpeed = carSettings.normalSpeed;
+					}
+
+					innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
+					outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
+
+					if (sign(carState.steeringAngle)<0){
+						//left turn
+						left_motor_move(innerWheelSpeed, FWD);
+						right_motor_move(outerWheelSpeed, FWD);
+					} else{
+						// right turn or straight
+						left_motor_move(outerWheelSpeed, FWD);
+						right_motor_move(innerWheelSpeed, FWD);
+					}
 				} else{
-					baseSpeed = carSettings.normalSpeed;
-				}
+					if(carSettings.useSpeedScale){
 
-				innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
-				outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
-
-				if (sign(carState.steeringAngle)<0){
-					//left turn
-					left_motor_move(innerWheelSpeed, FWD);
-					right_motor_move(outerWheelSpeed, FWD);
-				} else{
-					// right turn or straight
-					left_motor_move(outerWheelSpeed, FWD);
-					right_motor_move(innerWheelSpeed, FWD);
-				}
-
-
-				
-				#else
-				if(carSettings.useSpeedScale){
-
-					motors_move(carState.setSpeed, FWD);
-				} else{
-					motors_move(carSettings.normalSpeed, FWD);
-				#endif // DIFFERENTIAL_STEERING
+						motors_move(carState.setSpeed, FWD);
+					} else{
+						motors_move(carSettings.normalSpeed, FWD);
+					}
 				}
 				#endif //ifndef DISABLE_DRIVE_MOTORS
 				
