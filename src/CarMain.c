@@ -29,6 +29,7 @@
 
 #define RACECAR_STATE_MACHINE
 #define RSM_LEDS
+#define RSM_EVASIVE_MAN
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
@@ -82,10 +83,12 @@
 // [x] use switches to select different track mode
 // [x] use LED to display track mode
 // [x] swap the RSM_SPEED to a boolean and use it only for reckless mode
-// [ ] when in edge state turn the servo to its max 
+// [x] when in edge state turn the servo to its max 
 // [ ] implement differential drive for sharper turning - esp. near edge
 
-
+// [ ] test evasive steering
+// [ ] test differential steering
+// [ ] tune differential steering
 // [ ] test different modes and optimize
 
 // optional/ideas
@@ -342,8 +345,6 @@ int main(void){
 				carState.trackPosition = richardHammond;
 			}
 
-			
-
 			switch (carState.trackPosition){
 				case straight:
 					stateLEDColor = RED;
@@ -376,29 +377,36 @@ int main(void){
 
 			#ifdef RSM_LEDS
 			LED2_SetColor(stateLEDColor);
-			#endif
-
-
+			#endif // ifdef RSM_LEDS
 			#endif // ifdef RACECAR_STATE_MACHINE
 
-			// turn the servo towards the center of the track
-			#ifndef USE_PID_STEERING
-			// just use regular steering method
-			carState.steeringAngle = steer_to_center(trackCenterIndex);
-			#else 
-			// use PID steering
-			// // lets tell PID that positive and negative exist
-			// // convert from value between 0 and 127 to -60 to 60
-			roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned lol
-			scaledCenter = roughCenter * 4;
-			// bound steering 
-			if (scaledCenter < -60){ scaledCenter = -60;}
-			if (scaledCenter > 60){ scaledCenter = 60;}
-			PIDRes = SteeringPID(scaledCenter);
-			iPIDRes = (int16_t) PIDRes;	
-			// steer to calculated point
-			carState.steeringAngle =  set_steering_deg(iPIDRes);
-			#endif
+			#ifdef RSM_EVASIVE_MAN
+			/* turn all the way towards the center of the track in current dir if near the track edge */
+			if(carState.trackPosition == trackEdge){
+				carState.steeringAngle = set_steering_deg(sign(carState.steeringAngle)*SERVO_MAX_ANGLE_DEG);
+			} else{
+			#endif // RSM_EVASIVE_MAN
+				// turn the servo towards the center of the track
+				#ifndef USE_PID_STEERING
+				// just use regular steering method
+				carState.steeringAngle = steer_to_center(trackCenterIndex);
+				#else 
+				// use PID steering
+				// // lets tell PID that positive and negative exist
+				// // convert from value between 0 and 127 to -60 to 60
+				roughCenter = -(trackCenterIndex - 62); // should be 64 but tuned
+				scaledCenter = roughCenter * 4;
+				// bound steering 
+				if (scaledCenter < -60){ scaledCenter = -60;}
+				if (scaledCenter > 60){ scaledCenter = 60;}
+				PIDRes = SteeringPID(scaledCenter);
+				iPIDRes = (int16_t) PIDRes;	
+				// steer to calculated point
+				carState.steeringAngle =  set_steering_deg(iPIDRes);
+				#endif
+			#ifdef RSM_EVASIVE_MAN
+			}
+			#endif // RSM_EVASICE_MAN
 
 			if(carOnTrack){
 				#ifdef ON_TRACK_LEDS //TODO swap to #ifndef RACECAR_STATE_MACHINE and then implement this identical functionality in RSM too
@@ -407,13 +415,11 @@ int main(void){
 
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
-
 				if(carSettings.useStateSpeed){
 					motors_move(carState.setSpeed, FWD);
 				} else{
 					motors_move(carSettings.normalSpeed, FWD);
 				}
-
 				#endif //ifndef DISABLE_DRIVE_MOTORS
 				
 			} else{
