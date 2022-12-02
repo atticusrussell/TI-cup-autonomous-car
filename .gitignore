@@ -16,9 +16,10 @@
 .vscode/settings.json
 .vscode/c_cpp_properties.json
 #don't ignore the files that change the device config
-!RTE/Device/MSP432P4111/system_msp432p4111.c
-!RTE/Device/MSP432P4111/startup_msp432p4111_uvision.s
-
-!RTE/Device/MSP432P401R/system_msp432p401r.c
-!RTE/Device/MSP432P401R/startup_msp432p401r_uvision.s
+!RTE/Device/*.c
+!RTE/Device/*.s
+# MSP432P4111/system_msp432p4111.c
+# !RTE/Device/MSP432P4111/startup_msp432p4111_uvision.s
+# !RTE/Device/MSP432P401R/system_msp432p401r.c
+# !RTE/Device/MSP432P401R/startup_msp432p401r_uvision.s
 
