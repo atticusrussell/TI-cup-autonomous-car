@@ -208,24 +208,24 @@ int main(void){
 	/* create each of the modes*/
 	// TODO set unique high speed and VCMs for each mode
 	int sharedVCM = TUNING_ON_TRACK_VCM;
-	struct carSettings recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM};
-	struct carSettings conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM};
+	struct carSettings recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,TRUE};
+	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,FALSE};
+	struct carSettings conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
 
 
 	// var that stores the state of the car
-	typedef struct carState{
+	struct carState{
 		// int steeringAngle;
 		// int motorSpeed;
 		enum speedSetting attackMode;
 		enum jeremyClarkson trackPosition;
 		int setSpeed; //the speed that the car is momentarily set to
 		int16_t magnitudeVCM; // value of the camera at the center of the track
-	} carStateT;
+	};
 
 
 
-	carStateT thisCarState;
+	struct carState thisCarState;
 	thisCarState.attackMode = reckless; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
 	thisCarState.trackPosition = normal; 
