@@ -16,6 +16,7 @@
 // the minimum camera visual centrer mass that is considered to be on the track
 #define OG_ON_TRACK_VCM	(6000) // old one - too high honestly
 #define CONSERVATIVE_VCM	(5000) // this works nicely - will keep as cons.
+#define NORMAL_VCM		(3000)	// TODO test this and tune it
 
 #define TUNING_ON_TRACK_VCM	(3000)
 

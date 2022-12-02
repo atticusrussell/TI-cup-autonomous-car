@@ -209,7 +209,7 @@ int main(void){
 	// TODO set unique high speed and VCMs for each mode
 	int sharedVCM = TUNING_ON_TRACK_VCM;
 	struct carSettings recklessMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,TRUE};
-	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED,sharedVCM,FALSE};
+	struct carSettings balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,FALSE};
 	struct carSettings conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
 
 
