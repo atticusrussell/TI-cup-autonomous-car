@@ -39,7 +39,7 @@
 // #define DIFFERENTIAL_STEERING
 
 #define IW_ANGLE_MULTIPLY (0.3)
-#define OW_ANGLE_MULTIPLY (0.1)
+#define OW_ANGLE_MULTIPLY (0.0)
 
 #define SPEED_SCALE_VCM_DIVISOR (7000)
 
@@ -242,7 +242,7 @@ int main(void){
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE,TRUE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,RECKLESS_VCM,TRUE,TRUE};
 	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE,TRUE};
 	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE, FALSE};
 
@@ -281,8 +281,8 @@ int main(void){
 
 	/* differential steering*/
 	// TODO make struct diffsteering
-	int innerWheelSpeed;
-	int outerWheelSpeed;
+	double innerWheelSpeed;
+	double outerWheelSpeed;
 	int baseSpeed;
 	int absAngle;
 
@@ -443,6 +443,7 @@ int main(void){
 
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
+				// Differential steering
 				if(carSettings.useDiffSteering){
 					absAngle = abs(carState.steeringAngle);
 
@@ -451,9 +452,15 @@ int main(void){
 					} else{
 						baseSpeed = carSettings.normalSpeed;
 					}
+					// set outer wheel fast if almost off of track
+					if(absAngle>55){
 
+					}else{
 					innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
+					 //(carState.setSpeed/35); // also scale based on speed
 					outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
+					}
+
 
 					if (sign(carState.steeringAngle)<0){
 						//left turn
@@ -465,8 +472,8 @@ int main(void){
 						right_motor_move(innerWheelSpeed, FWD);
 					}
 				} else{
+				// regular drive
 					if(carSettings.useSpeedScale){
-
 						motors_move(carState.setSpeed, FWD);
 					} else{
 						motors_move(carSettings.normalSpeed, FWD);
@@ -476,6 +483,8 @@ int main(void){
 				
 			} else{
 				//we are off the track
+				// TODO set delay of 0.1 seconds before we kill power
+				// TODO
 				#ifdef ON_TRACK_LEDS
 				LED2_SetColor(RED);
 				#endif
