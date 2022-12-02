@@ -41,10 +41,15 @@
 // #define DIFFERENTIAL_STEERING
 
 #define IW_ANGLE_MULTIPLY (0.3)
-#define OW_ANGLE_MULTIPLY (0.0)
+#define OW_ANGLE_MULTIPLY (0.05)
 
 #define SPEED_SCALE_VCM_DIVISOR (7000)
 
+// #define SCALAR_SPEED_ADJ (1.1)
+
+// #define MIN_TURN_SPEED 25
+
+// #define NO_BRAKES
 
 
 
@@ -98,6 +103,8 @@
 // [x] configure Timer32_2 to run in one-shot mode
 // [x] figure out how to use generated interrupt to stop the car
 // [ ] implement it
+// NOTE even without onTrack detection turned on it still stops - param adjust
+// [ ] I NEED PID - TUNE IT because I need to use the error history
 
 // [ ] tie "off track" to RSM 
 // [ ] with adjusted camera keep history of center and detect off track based on that
@@ -473,6 +480,12 @@ int main(void){
 				// scale the speed by how straight it is 
 				speedFactor = carState.magnitudeVCM / SPEED_SCALE_VCM_DIVISOR;
 				carState.setSpeed = carSettings.normalSpeed * speedFactor;
+				// create a min speed during turns
+				#ifdef MIN_TURN_SPEED
+				if ((carState.attackMode >= trackEdge) && carState.setSpeed < MIN_TURN_SPEED){
+					carState.setSpeed = MIN_TURN_SPEED;
+				}
+				#endif
 			}
 
 
@@ -505,7 +518,9 @@ int main(void){
 			}
 		
 			// NOTE actual calls to movement here
+			#ifndef NO_BRAKES
 			if(carOnTrack){  
+			#endif
 				DC_motors_enable();
 				// determine baseline speed
 				if(carSettings.useSpeedScale){
@@ -521,10 +536,13 @@ int main(void){
 				// regular drive both motors same speed
 					motors_move(desiredSpeed, FWD);
 				}
+			#ifndef NO_BRAKES
 			} else{
 				//we are off the track
+				
 				stop_DC_motors();
 			}
+			#endif
 		#ifdef CAR_ARMING
 		} else{
 			stop_DC_motors();

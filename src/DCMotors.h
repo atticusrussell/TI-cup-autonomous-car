@@ -18,7 +18,7 @@
 #define MAX_SPEED 		(65) //NOTE untested 
 // normal forward motor duty cycle
 
-#define RECKLESS_SPEED		(45)
+#define RECKLESS_SPEED		(43)
 #define NORMAL_SPEED 		(40) // DONT CHANGE  THIS WORKS VCM 3000 
 // 27 too slow to get up the lil hill
 #define CONSERVATIVE_SPEED 		(35)	// works - barely gets up hill but does
