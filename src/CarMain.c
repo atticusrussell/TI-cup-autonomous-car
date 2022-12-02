@@ -34,7 +34,8 @@
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
-#define TURN_INCREMENT 	(3)
+#define OG_TURN_SCALAR 	(3) // for the old camera angle
+#define TUNED_TURN_SCALAR (2.4) // for the new camera angle to make less twitchy
 
 // #define DIFFERENTIAL_STEERING
 
@@ -91,9 +92,9 @@
 // [x] use LED to display track mode
 // [x] swap the RSM_SPEED to a boolean and use it only for reckless mode
 // [x] when in edge state turn the servo to its max 
-// [ ] implement differential drive for sharper turning - esp. near edge
+// [x] implement differential drive for sharper turning - esp. near edge
+// [ ] make servo steering less twitchy with adjusted camera
 
-// [ ] test evasive steering
 // [ ] test differential steering
 // [ ] tune differential steering
 // [ ] test different modes and optimize
@@ -123,13 +124,13 @@
  * @param trackCenter a number from 1 to 128 that indicates the track center
  * @return 
  */
-int8_t steer_to_center(uint8_t trackCenter){
+int8_t steer_to_center(uint8_t trackCenter, double steerScalar){
 	int8_t steerAng;	// ang deg center of car to center of track
 	// if less than 64 will be negative and left, otherwise pos and right
 	steerAng = 64 - trackCenter;
 	// 64 is close enough to 60. 
 	// if it is greater than 60 or less than -60 bounding func will catch
-	return set_steering_deg(steerAng*TURN_INCREMENT);
+	return set_steering_deg(steerAng*steerScalar);
 }
 
 
@@ -239,12 +240,13 @@ int main(void){
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useSpeedScale; // whether to use statespeed
 		BOOLEAN useDiffSteering;
+		double steeringScalar;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,RECKLESS_VCM,TRUE,TRUE};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE,TRUE};
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE, FALSE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR };
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR};
 
 	// var that stores the state of the car
 	struct carStateStruct{
@@ -411,7 +413,7 @@ int main(void){
 				// turn the servo towards the center of the track
 				#ifndef USE_PID_STEERING
 				// just use regular steering method
-				carState.steeringAngle = steer_to_center(trackCenterIndex);
+				carState.steeringAngle = steer_to_center(trackCenterIndex, carSettings.steeringScalar);
 				#else 
 				// use PID steering
 				// // lets tell PID that positive and negative exist
