@@ -109,7 +109,7 @@ void T32_INT1_IRQHandler(void)
 }
 
 // ***************** Timer32_2_Init ****************
-// Activate Timer32 Timer 2 interrupts to run user task periodically
+// Activate Timer32 Timer 2 interrupts to run user task in one-shot mode
 // Inputs:  task is a pointer to a user function
 //          period in units (1/(bus clock)/div), 32 bits
 //          div is clock divider for Timer32 Timer 1
@@ -150,7 +150,13 @@ void Timer32_2_Init(void(*task)(void), unsigned long period, enum timer32divider
 	// bit0,             1=one shot mode, 0=wrapping mode
 	
   	//TIMER32_CONTROL2   
-  	TIMER32_CONTROL2 |= BIT7;
+  	TIMER32_2->CONTROL |= BIT7; 	// enable timer
+	TIMER32_2->CONTROL &= ~BIT6; 	// free-running
+	TIMER32_2->CONTROL |= BIT5;	// enable interrupt
+	TIMER32_2->CONTROL |= BIT1; 	// 32-bit counter
+	TIMER32_2->CONTROL |= BIT0; 	// one-shot mode
+	
+
 
 	// interrupts enabled in the main program after all devices initialized
   	NVIC_IPR6 = (NVIC_IPR6&0xFFFF00FF)|0x00004000; // priority 2
@@ -167,7 +173,7 @@ void Timer32_2_Init(void(*task)(void), unsigned long period, enum timer32divider
 void T32_INT2_IRQHandler(void)
 {
 	// acknowledge Timer32 Timer 1 interrupt
-	// TIMER32_INTCLR2
+	/* " Any write to the TIMER32_INTCLR2 register clears the interrupt output from the counter */
   	TIMER32_INTCLR2 = 0;    
 	
 	// execute user task
