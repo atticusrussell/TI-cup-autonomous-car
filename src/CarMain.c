@@ -188,7 +188,7 @@ int main(void){
 		turning = 3,
 		trackEdge = 4,
 		richardHammond = 5  // off the track
-	} jeremyClarkson;
+	};
 	#endif
 
 	#ifdef MODE_SWITCHING
@@ -196,7 +196,7 @@ int main(void){
 		reckless = 0,
 		balanced = 1,
 		conservative = 2
-	} speedSetting;
+	};
 
 	struct carSettings{
 		int normalSpeed;
