@@ -26,6 +26,8 @@
 #define HAMMOND_SPEED		(25)
 
 
+#define RECKLESS_SPEED		(40)
+
 // 27 too slow to get up the lil hill
 #define CONSERVATIVE_SPEED 		(30)	// works - barely gets up hill but does
 

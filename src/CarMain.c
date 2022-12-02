@@ -7,6 +7,7 @@
 */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "msp.h"
 #include "uart.h"
 #include "Common.h"
@@ -29,12 +30,18 @@
 
 #define RACECAR_STATE_MACHINE
 #define RSM_LEDS
-#define RSM_EVASIVE_MAN
+// #define RSM_EVASIVE_MAN
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
 #define TURN_INCREMENT 	(3)
 
+// #define DIFFERENTIAL_STEERING
+
+#define IW_ANGLE_MULTIPLY (0.3)
+#define OW_ANGLE_MULTIPLY (0.1)
+
+#define SPEED_SCALE_VCM_DIVISOR (7000)
 
 
 
@@ -230,12 +237,12 @@ int main(void){
 		//TODO remove this probably or switch it for a scalar to * speed by
 		int maxSpeed;	// the absolute max speed the car will do on straights 
 		int vcmThreshold; // what the car counts as the track edge
-		BOOLEAN useStateSpeed; // whether to use statespeed
+		BOOLEAN useSpeedScale; // whether to use statespeed
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {NORMAL_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,FALSE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,MAX_SPEED,TUNING_ON_TRACK_VCM,TRUE};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED,MAX_SPEED, NORMAL_VCM,TRUE};
 	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, MAX_SPEED, CONSERVATIVE_VCM, FALSE};
 
 	// var that stores the state of the car
@@ -252,7 +259,7 @@ int main(void){
 
 	/* instantiate carState and decide how car should default*/
 	struct carStateStruct carState;
-	carState.attackMode = reckless; //choose the starting mode
+	carState.attackMode = balanced; //choose the starting mode
 	BOOLEAN modeLEDUpdated = FALSE; //allows the initial mode to be displayed
 	carState.trackPosition = normal;
 	carState.steeringAngle = 0; // start straight ahead
@@ -270,6 +277,20 @@ int main(void){
 	int16_t scaledCenter;
 	int16_t iPIDRes;
 	#endif
+
+	#ifdef DIFFERENTIAL_STEERING
+	int innerWheelSpeed;
+	int outerWheelSpeed;
+	const int smallTurn = 20;
+	const int largeTurn = 40;
+	int baseSpeed;
+
+	int absAngle;
+
+	#endif //DIFFERENTIAL_STEERING
+
+	// BOOLEAN useSpeedScale = TRUE;
+	double speedFactor = 1.0;
 
 	initCarParts();
 	// infinite loop to contain logic
@@ -348,32 +369,35 @@ int main(void){
 			switch (carState.trackPosition){
 				case straight:
 					stateLEDColor = RED;
-					carState.setSpeed = STRAIGHT_SPEED;
+					// carState.setSpeed = STRAIGHT_SPEED;
 					break;
 				case normal:
 					stateLEDColor = YELLOW;
-					carState.setSpeed = NORMAL_SPEED;
+					// carState.setSpeed = NORMAL_SPEED;
 					break;
 				case approachingTurn:
 					stateLEDColor = GREEN;
-					carState.setSpeed = APPROACH_SPEED;
+					// carState.setSpeed = APPROACH_SPEED;
 					break;
 				case turning:
 					stateLEDColor = CYAN;
-					carState.setSpeed = TURNING_SPEED;
+					// carState.setSpeed = TURNING_SPEED;
 					break;
 				case trackEdge:
 					stateLEDColor = BLUE;
-					carState.setSpeed = EDGE_SPEED;
+					// carState.setSpeed = EDGE_SPEED;
 					break;
 				case richardHammond:
 					stateLEDColor = MAGENTA;
-					carState.setSpeed = HAMMOND_SPEED;
+					// carState.setSpeed = HAMMOND_SPEED;
 					break;
 				
 				default:
 					break;
 			}
+
+
+
 
 			#ifdef RSM_LEDS
 			LED2_SetColor(stateLEDColor);
@@ -408,6 +432,12 @@ int main(void){
 			}
 			#endif // RSM_EVASICE_MAN
 
+			if(carSettings.useSpeedScale){
+			// scale the speed by how straight it is 
+			speedFactor = carState.magnitudeVCM / SPEED_SCALE_VCM_DIVISOR;
+			carState.setSpeed = carSettings.normalSpeed * speedFactor;
+			}
+
 			if(carOnTrack){
 				#ifdef ON_TRACK_LEDS //TODO swap to #ifndef RACECAR_STATE_MACHINE and then implement this identical functionality in RSM too
 				LED2_SetColor(GREEN);
@@ -415,10 +445,38 @@ int main(void){
 
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
-				if(carSettings.useStateSpeed){
+				#ifdef DIFFERENTIAL_STEERING
+				
+				absAngle = abs(carState.steeringAngle);
+
+				if(carSettings.useSpeedScale){
+					baseSpeed = carState.setSpeed;
+				} else{
+					baseSpeed = carSettings.normalSpeed;
+				}
+
+				innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
+				outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
+
+				if (sign(carState.steeringAngle)<0){
+					//left turn
+					left_motor_move(innerWheelSpeed, FWD);
+					right_motor_move(outerWheelSpeed, FWD);
+				} else{
+					// right turn or straight
+					left_motor_move(outerWheelSpeed, FWD);
+					right_motor_move(innerWheelSpeed, FWD);
+				}
+
+
+				
+				#else
+				if(carSettings.useSpeedScale){
+
 					motors_move(carState.setSpeed, FWD);
 				} else{
 					motors_move(carSettings.normalSpeed, FWD);
+				#endif // DIFFERENTIAL_STEERING
 				}
 				#endif //ifndef DISABLE_DRIVE_MOTORS
 				
