@@ -29,7 +29,6 @@
 
 #define RACECAR_STATE_MACHINE
 #define RSM_LEDS
-#define RSM_SPEED // TODO this actually should just be a boolean that is set for the agressive mode
 
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
@@ -82,7 +81,7 @@
 // [x] use the visual mass to determine corners vs straights and set drive speed
 // [x] use switches to select different track mode
 // [x] use LED to display track mode
-// [ ] swap the RSM_SPEED to a boolean and use it only for reckless mode
+// [x] swap the RSM_SPEED to a boolean and use it only for reckless mode
 // [ ] when in edge state turn the servo to its max 
 // [ ] implement differential drive for sharper turning - esp. near edge
 
@@ -332,6 +331,7 @@ int main(void){
 			} else if (carState.magnitudeVCM > THRESHOLD_EDGE){
 				carState.trackPosition = trackEdge;
 			} else{
+			// TODO add richardHammond as part of RSM / usse it for "off track"
 				carState.trackPosition = richardHammond;
 			}
 
@@ -374,9 +374,9 @@ int main(void){
 			LED2_SetColor(ledColor);
 			#endif
 
-			#ifdef RSM_SPEED // should be a boolean
-			carState.setSpeed = stateSpeed;
-			#endif
+			if(carSettings.useStateSpeed){
+				carState.setSpeed = stateSpeed;
+			}
 
 			#endif // ifdef RACECAR_STATE_MACHINE
 
@@ -400,17 +400,18 @@ int main(void){
 			#endif
 
 			if(carOnTrack){
-				#ifdef ON_TRACK_LEDS
+				#ifdef ON_TRACK_LEDS //TODO swap to #ifndef RACECAR_STATE_MACHINE and then implement this identical functionality in RSM too
 				LED2_SetColor(GREEN);
 				#endif
+
 				#ifndef DISABLE_DRIVE_MOTORS
 				DC_motors_enable();
 
-				#ifndef RSM_SPEED //TODO this should be a boolean
-				motors_move(carSettings.normalSpeed, FWD);
-				#else
-				motors_move(carState.setSpeed,FWD);
-				#endif 
+				if(carSettings.useStateSpeed){
+					motors_move(carState.setSpeed, FWD);
+				} else{
+					motors_move(carSettings.normalSpeed, FWD);
+				}
 
 				#endif //ifndef DISABLE_DRIVE_MOTORS
 				
