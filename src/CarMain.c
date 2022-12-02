@@ -120,6 +120,13 @@
 // needs to be global because accessed by IRQ function
 	BOOLEAN headlessModeActive = FALSE;
 
+// needs to be global to be accessed in the differential steering function
+enum motorDir{ // the direction of the motor 
+	FWD = 0,
+	REV = 1
+};
+
+
 
 /**
  * @brief steers the servo to the center of the track
@@ -204,6 +211,32 @@ void endHeadlessMode(void){
 }
 
 
+/**
+ * @brief implements motor differential thrust to assist with steering
+ * 
+ * @param steeringAngle the angle that the servos are already set to steer to
+ * @param baseSpeed 		the baseline speed to modify per motor
+ */
+void runDiffThrust(int8_t steeringAngle, double baseSpeed){
+	double innerWheelSpeed;
+	double outerWheelSpeed;
+	int absAngle = abs(steeringAngle);
+	
+	innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
+	outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
+
+	if (sign(steeringAngle)<0){
+		//left turn
+		left_motor_move(innerWheelSpeed, FWD);
+		right_motor_move(outerWheelSpeed, FWD);
+	} else{
+		// right turn or straight
+		left_motor_move(outerWheelSpeed, FWD);
+		right_motor_move(innerWheelSpeed, FWD);
+	}
+}
+
+
 int main(void){
 	/* camera variables*/
 	extern uint16_t line[128];			// current array of raw camera data
@@ -214,12 +247,7 @@ int main(void){
 	extern BOOLEAN	g_sendData;			// if the camera is ready to send new data
 
 
-	// the direction of the motor -> pin to write to i think
-	enum motorDir{
-		FWD = 0,
-		REV = 1
-	};
-
+	
 	#ifdef CAR_ARMING
 	BOOLEAN carArmed = FALSE;
 	#endif
@@ -249,13 +277,13 @@ int main(void){
 		int normalSpeed;
 		int vcmThreshold; // what the car counts as the track edge
 		BOOLEAN useSpeedScale; // whether to use statespeed
-		BOOLEAN useDiffSteering;
+		BOOLEAN useDiffThrust;
 		double steeringScalar;
 		BOOLEAN enableHeadless;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, TRUE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE};
 	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE};
 	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE};
 
@@ -294,10 +322,8 @@ int main(void){
 
 	/* differential steering*/
 	// TODO make struct diffsteering
-	double innerWheelSpeed;
-	double outerWheelSpeed;
-	int baseSpeed;
-	int absAngle;
+	double desiredSpeed;
+	
 
 
 	double speedFactor = 1.0; //silly initialized val
@@ -307,7 +333,7 @@ int main(void){
 	// make struct lol
 	// make instance of carStateStruct that will contain last state
 	struct carStateStruct  lastCarState;
-	int msHeadlessChicken = 300 ; // amount of time it will continue with last data before cutting off
+	int msHeadlessChicken = 100 ; // amount of time it will continue with last data before cutting off
 	
 	BOOLEAN onTrackBuffer;
 	
@@ -391,29 +417,22 @@ int main(void){
 			switch (carState.trackPosition){
 				case straight:
 					stateLEDColor = RED;
-					// carState.setSpeed = STRAIGHT_SPEED;
 					break;
 				case normal:
 					stateLEDColor = YELLOW;
-					// carState.setSpeed = NORMAL_SPEED;
 					break;
 				case approachingTurn:
 					stateLEDColor = GREEN;
-					// carState.setSpeed = APPROACH_SPEED;
 					break;
 				case turning:
 					stateLEDColor = CYAN;
-					// carState.setSpeed = TURNING_SPEED;
 					break;
 				case trackEdge:
 					stateLEDColor = BLUE;
-					// carState.setSpeed = EDGE_SPEED;
 					break;
 				case richardHammond:
 					stateLEDColor = MAGENTA;
-					// carState.setSpeed = HAMMOND_SPEED;
 					break;
-				
 				default:
 					break;
 			}
@@ -451,9 +470,9 @@ int main(void){
 			#endif // RSM_EVASICE_MAN
 
 			if(carSettings.useSpeedScale){
-			// scale the speed by how straight it is 
-			speedFactor = carState.magnitudeVCM / SPEED_SCALE_VCM_DIVISOR;
-			carState.setSpeed = carSettings.normalSpeed * speedFactor;
+				// scale the speed by how straight it is 
+				speedFactor = carState.magnitudeVCM / SPEED_SCALE_VCM_DIVISOR;
+				carState.setSpeed = carSettings.normalSpeed * speedFactor;
 			}
 
 
@@ -481,45 +500,26 @@ int main(void){
 						headlessModeActive = TRUE;
 					}
 				}
+			} else{
+				carOnTrack = onTrackBuffer;
 			}
 		
-
+			// NOTE actual calls to movement here
 			if(carOnTrack){  
 				DC_motors_enable();
-				// Differential steering
-				if(carSettings.useDiffSteering){
-					absAngle = abs(carState.steeringAngle);
-
-					if(carSettings.useSpeedScale){
-						baseSpeed = carState.setSpeed;
-					} else{
-						baseSpeed = carSettings.normalSpeed;
-					}
-					// set outer wheel fast if almost off of track
-					if(absAngle>55){
-
-					}else{
-					innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
-					outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
-					}
-
-
-					if (sign(carState.steeringAngle)<0){
-						//left turn
-						left_motor_move(innerWheelSpeed, FWD);
-						right_motor_move(outerWheelSpeed, FWD);
-					} else{
-						// right turn or straight
-						left_motor_move(outerWheelSpeed, FWD);
-						right_motor_move(innerWheelSpeed, FWD);
-					}
+				// determine baseline speed
+				if(carSettings.useSpeedScale){
+					desiredSpeed = carState.setSpeed;
 				} else{
-				// regular drive
-					if(carSettings.useSpeedScale){
-						motors_move(carState.setSpeed, FWD);
-					} else{
-						motors_move(carSettings.normalSpeed, FWD);
-					}
+					desiredSpeed = carSettings.normalSpeed;
+				}
+
+				// Differential steering
+				if(carSettings.useDiffThrust){
+					runDiffThrust(carState.steeringAngle, desiredSpeed);
+				} else{
+				// regular drive both motors same speed
+					motors_move(desiredSpeed, FWD);
 				}
 			} else{
 				//we are off the track
