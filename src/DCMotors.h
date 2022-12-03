@@ -15,12 +15,12 @@
 
 // constant params // TODO tweak as needed
 // maximum motor duty cycle to use during straights
-#define MAX_SPEED 		(65) //NOTE untested 
+#define MAX_SPEED 		(40) //NOTE untested 
 // normal forward motor duty cycle
 #define STUPID_SPEED			(48)
 
 #define RECKLESS_SPEED		(46)
-#define NORMAL_SPEED 		(41) // DONT CHANGE  40 THIS WORKS VCM 3000 
+#define NORMAL_SPEED 		(40) // DONT CHANGE  40 THIS WORKS VCM 3000 
 // 27 too slow to get up the lil hill
 #define CONSERVATIVE_SPEED 		(35)	// works - barely gets up hill but does
 
