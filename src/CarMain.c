@@ -36,6 +36,7 @@
 /* define constants that are important parameters to tune */
 // turn increments (tuning how hard we turn) unitless scalar
 #define OG_TURN_SCALAR 	(3) // for the old camera angle
+#define STUPID_TURN_SCALAR (2.4)
 #define TUNED_TURN_SCALAR (2.4) // for the new camera angle to make less twitchy
 
 // #define DIFFERENTIAL_STEERING
@@ -43,9 +44,13 @@
 #define IW_ANGLE_MULTIPLY (0.3)
 #define OW_ANGLE_MULTIPLY (0.05)
 
+#define STUPID_IW_ANGLE_MULTIPLY (0.33)
+#define STUPID_OW_ANGLE_MULTIPLY (0.055)
+
 #define SPEED_SCALE_VCM_DIVISOR (7000)
 
 // #define MIN_TURN_SPEED 25
+// #define MIN_SPEED 27
 
 // #define NO_BRAKES
 
@@ -253,13 +258,18 @@ void endHeadlessMode(void){
  * @param steeringAngle the angle that the servos are already set to steer to
  * @param baseSpeed 		the baseline speed to modify per motor
  */
-void runDiffThrust(int8_t steeringAngle, double baseSpeed){
+void runDiffThrust(int8_t steeringAngle, double baseSpeed, double innerWheelAngleMultiple, double outerWheelAngleMultiple){
 	double innerWheelSpeed;
 	double outerWheelSpeed;
 	int absAngle = abs(steeringAngle);
 	
-	innerWheelSpeed = baseSpeed - absAngle*IW_ANGLE_MULTIPLY;
-	outerWheelSpeed = baseSpeed + absAngle*OW_ANGLE_MULTIPLY;
+	innerWheelSpeed = baseSpeed - absAngle*innerWheelAngleMultiple;
+	outerWheelSpeed = baseSpeed + absAngle*outerWheelAngleMultiple;
+	#ifdef MIN_SPEED
+	if(baseSpeed<MIN_SPEED){
+		outerWheelSpeed = MIN_SPEED;
+	}
+	#endif
 
 	if (sign(steeringAngle)<0){
 		//left turn
@@ -316,12 +326,14 @@ int main(void){
 		double steeringScalar;
 		BOOLEAN enableHeadless;
 		BOOLEAN usePIDServo;
+		double innerWheelAngleMultiple;
+		double outerWheelAngleMultiple;
 	};
 
 	/* create each of the modes*/
-	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE, TRUE};
-	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE, FALSE};
-	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE, FALSE};
+	struct carSettingsStruct recklessMode = {RECKLESS_SPEED,RECKLESS_VCM,TRUE,TRUE, STUPID_TURN_SCALAR, FALSE, FALSE, STUPID_IW_ANGLE_MULTIPLY, STUPID_OW_ANGLE_MULTIPLY};
+	struct carSettingsStruct balancedMode = {NORMAL_SPEED, NORMAL_VCM,TRUE,TRUE, TUNED_TURN_SCALAR, FALSE, FALSE, IW_ANGLE_MULTIPLY,OW_ANGLE_MULTIPLY};
+	struct carSettingsStruct conservativeMode = {CONSERVATIVE_SPEED, CONSERVATIVE_VCM, FALSE, FALSE, TUNED_TURN_SCALAR, FALSE, FALSE, IW_ANGLE_MULTIPLY, OW_ANGLE_MULTIPLY};
 
 	// var that stores the state of the car
 	struct carStateStruct{
@@ -531,7 +543,7 @@ int main(void){
 
 				// Differential steering
 				if(carSettings.useDiffThrust){
-					runDiffThrust(carState.steeringAngle, desiredSpeed);
+					runDiffThrust(carState.steeringAngle, desiredSpeed,carSettings.innerWheelAngleMultiple, carSettings.outerWheelAngleMultiple);
 				} else{
 				// regular drive both motors same speed
 					motors_move(desiredSpeed, FWD);

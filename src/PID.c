@@ -41,12 +41,12 @@ void steering_pid_init(void){
 
 float SteeringPID(float intended, float actual){
 	// grab errors from array
-	error_n1 = steerErrHistArray[0];
-	error_n2 = steerErrHistArray[1];
+	error_n1 = steerErrHistArray[1];
+	error_n2 = steerErrHistArray[2];
 
 	error = intended - actual;
 	setPoint = actual +
-		kpSteer * (error - error_n1) +
+		kpSteer * (error) +
 		kiSteer * (error + error_n1)*0.5f +
 		kdSteer * (error - 2.0f * error_n1 + error_n2);
 

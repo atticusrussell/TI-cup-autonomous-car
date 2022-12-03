@@ -11,9 +11,9 @@
 #define _PID_HEADER_FILE_
 
 //TODO tune me
-// HACK try next 0.05, 0.025, 0.045
-#define KP_STEER (0.5)
-#define KI_STEER (0.3)
+//  try next 0.05, 0.025, 0.045
+#define KP_STEER (0.05) // 0.05
+#define KI_STEER (0.025) // 0.025
 #define KD_STEER (0.0)
 
 #define PID_STEERING_ERROR_ENTRIES	(3) //TODO tune me
