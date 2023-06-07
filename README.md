@@ -1,7 +1,8 @@
 # TI Cup Autonomous Racecar
+![Right Profile View of Car](docs/images/car/car_right_cropped.jpg)
 
 ## Background
-Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). IDE students learn througout the course to interface various peripherals with a TI MSP432 microcontroller using embedded C programming. The knowledge learned during IDE is tested by the term project, where an TI MSP432 board is used to control an autonoumous 1/18-scale car to navigate a scale track constructed from plastic segments.
+Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). IDE students learn throughout the course to interface various peripherals with a TI MSP432 microcontroller using embedded C programming. The knowledge learned during IDE is tested by the term project, where an TI MSP432 board is used to control an autonoumous 1/18-scale car to navigate a scale track constructed from plastic segments.
 
  IDE students are split into teams of two, and each team is provided with standardized components for an autonomous model car. Teams assemble, program, and tune their cars with the goal of navigating the plastic racetrack as quickly as possible. The ultimate assessment is a time-trial race in which teams compete for the shortest lap time around a randomized track configuration. This competition is referred to as the "TI Cup" (formerly NXP Cup).
 
@@ -18,7 +19,7 @@ The base of the car is the [DFROBOT ROB0170](https://www.mouser.it/ProductDetail
 ### Electronics
 The car is controlled using a TI MSP432P4111 microcontroller. This is connected to the other components through a custom shield PCB developed by the CE department that adapts the headers of the TI MSP432 board to the correct pins for the RPi Motor Driver Board shield (intended for Raspberry Pi GPIO headers), and provides labeled pins to connect the camera, servo, and OLED.
 
-![ElectronicsStack](docs/images/car_electronics_closeup_sideview.jpg)
+![ElectronicsStack](docs/images/car/electronics_closeup.jpg)
 
 ### Camera
 
@@ -29,4 +30,4 @@ The car is controlled using a TI MSP432P4111 microcontroller. This is connected 
 
 
 ## Car Images
-![RearView](docs/images/car_woodtable_rearview.jpg)
+![RearView](docs/images/car/car_rear_portrait.jpg)
