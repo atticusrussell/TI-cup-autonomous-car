@@ -1,14 +1,15 @@
 # TI Cup Autonomous Racecar
-![Right Profile View of Car](docs/images/car/car_right_cropped.jpg)
-![Figure 8 demo](docs/demo/fig8.mp4)
 
-## Background
-Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). IDE students learn throughout the course to interface various peripherals with a TI MSP432 microcontroller using embedded C programming. The knowledge learned during IDE is tested by the term project, where an TI MSP432 board is used to control an autonoumous 1/18-scale car to navigate a scale track constructed from plastic segments.
+Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). IDE students learn throughout the course to interface various peripherals with a TI MSP432 microcontroller using embedded C programming. The knowledge learned during IDE is tested by the term project, where an TI MSP432 board is used to control an autonoumous 1/18-scale car to navigate a scale track constructed from plastic segments. IDE students are split into teams of two, and each team is provided with standardized components for an autonomous model car. Teams assemble, program, and tune their cars with the goal of navigating the plastic racetrack as quickly as possible. The ultimate assessment is a time-trial race in which teams compete for the shortest lap time around a randomized track configuration. This competition is referred to as the "TI Cup" (formerly NXP Cup). See [the rules](docs/'RIT-NXP Car Rules.pdf') for more information on the contest.
 
- IDE students are split into teams of two, and each team is provided with standardized components for an autonomous model car. Teams assemble, program, and tune their cars with the goal of navigating the plastic racetrack as quickly as possible. The ultimate assessment is a time-trial race in which teams compete for the shortest lap time around a randomized track configuration. This competition is referred to as the "TI Cup" (formerly NXP Cup).
+### Read [report.md](docs/report.md) for a more thorough explanation.
+
+https://github.com/atticusrussell/CMPE460_Car_Project/assets/60147768/7029acdb-6165-4c12-b1d5-a47e141b8409
 
 ## Hardware
 The cars are constructed using components previously used in the NXP cup that have been adapted to work with the TI board provided in this project.
+
+![Right Profile View of Car](docs/images/car/car_right_cropped.jpg)
 
 ### Base
 ![NXP Chassis](docs/images/NXP_cup_chassis.png)
@@ -23,10 +24,12 @@ The car is controlled using a TI MSP432P4111 microcontroller. This is connected 
 ![ElectronicsStack](docs/images/car/electronics_closeup.jpg)
 
 ### Camera
+The camera used was a Parallax TSL-1401 linescan camera. It was the robot's only source of information about its environment. The contrast between the white track pieces and the gray carpet allowed the robot to detect the track.
+
+![practice track](docs/images/testing_track_configuration.jpg)
 
 
 
-## Results
 
 
 
