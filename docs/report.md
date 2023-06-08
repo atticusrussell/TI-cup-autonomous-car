@@ -16,9 +16,8 @@ Autonomous vehicles are a novel technology being intensely researched and invest
 
 The goal of competitors in the Texas Instruments (TI) Cup was to design the fastest autonomous car that could complete a lap of an unknown track configuration in a time trial against several other cars. A total of 14 teams of two students were each provided with a TI Cup car kit to assemble, program, and compete with in the race. This kit consisted of a TI MSP432 Microcontroller, a car chassis with four wheels; the rear two driven by two DC motors, and the front two steered using a servo and some steering linkage hardware. The kit also included two batteries for the car, a motor driver shield, a custom board to interface the MSP432 with the motor driver and the other components, a line-scan camera on an adjustable mount to be raised above the car on a pole, and other miscellaneous components. The assembled vehicle is shown in [Fig. 1](#fig-1-the-ti-cup-car).
 
+#### Fig 1: *The TI Cup Car*[^CarPhoto^]
 ![The TI Cup Car](/docs/IEEE_Car_Race_Report_src/figs/CarRightSideProfile.jpg)
-
-##### Fig 1: *The TI Cup Car*[^CarPhoto^]
 
 
 
@@ -42,7 +41,7 @@ The development of this project was divided into three milestones leading up to 
 
 A multitude of components were used to construct the car, and are listed in the Bill of Materials (BOM) in [Table 1](#table-ti-cup-car-bill-of-materials). The Texas Instruments MSP432 microcontroller, also known as the microcontroller unit (MCU), was used to control all other components, and was connected to a custom-made interface board. This interface board plugged into the headers on top of the MSP432 and connected the appropriate pins of the microcontroller to a RPi MC33886 motor driver board, while exposing the pins required to interface with the servo, and those to connect to the line-scan camera as shown in Fig. 1. The RPi driver board connected to the battery, and, in addition to driving the DC motors on the rear wheels of the car, provided the MSP432 with the regulated 5 volt supply required for it to run while on battery. The MCU was connected electrically through the interface board to the MG996R servo motor, which was connected to the front wheels through the use of a steering arm. The brushed DC motors on the rear wheels of the car were from DFRobot’s KIT0167. The car was powered using a Tenergy 7.2V 3800 mAh Battery Pack, which was held to the chassis using the zip ties. The MCU was additionally connected to the Parallax TSL1401-DB Line-Scan Camera Module through the interface board.
 
-### Table: TI Cup Car Bill of Materials [^BeatoBom^]
+#### Table: TI Cup Car Bill of Materials [^BeatoBom^]
 
 | **Part** | **Name** | **Qty** | **Price** |
 | --- | --- | --- | --- |
@@ -69,9 +68,8 @@ Another method a previous team used is the bang-bang strategy in which the car i
 ### PID Control
 PID is a control algorithm that uses feedback to control systems. The algorithm calculates the error between the desired output and the actual output of the system and applies corrective actions to bring the output closer to the desired value. The three terms in the algorithm, Proportional, Integral, and Derivative, represent different aspects of the error and are used to calculate the corrective action. [Fig. 2](#fig-2-pid-controller-block-diagram) displays a block diagram of a PID controller in a closed feedback loop.
 
+#### Fig. 2: *PID Controller Block Diagram*[^pidDiagram^]
 ![PID Controller Block Diagram](/docs/IEEE_Car_Race_Report_src/figs/pidAttempt3.png)
-
-##### Fig. 2: *PID Controller Block Diagram*[^pidDiagram^]
 
 A quirk of PID control is that it is not always necessary to implement all three of the components, depending on the application. Some systems may only require the use of proportional control, and others may only require proportional and integral or proportional and derivative to reach the desired behavior of the system.
 
@@ -80,15 +78,13 @@ The Parallax TSL-1401 line-scan camera used in the TI Cup car's design is a crit
 
 The line-scan camera has two input signals, CLK and SI, and one analog output signal, A0. In order to initiate data transfer from the TSL-1401R camera, SI must go high for a brief duration (less than one period of CLK). This triggers the clocking out of data from the previous exposure on A0 (the timing of which is determined by CLK) and triggers the next exposure to begin. The 128 pulses of CLK following the pulse on SI define the time that the values captured by each of the 128 photodetectors during the previous exposure is read out on A0. This cycle repeats. The interval between the pulses on SI determines the exposure time [^ex6^]. The integration time used for our car was 20 ms. The timing diagram in [Fig. 3](#fig-3-line-scan-camera-timing-diagram) illustrates the described sequence of signals.
 
+#### Fig. 3: *Line-Scan Camera Timing Diagram*[^cameraTiming^]
 ![Line-Scan Camera Timing Diagram](/docs/IEEE_Car_Race_Report_src/figs/biggerCamTimingDiagram.png)
-
-##### Fig. 3: *Line-Scan Camera Timing Diagram*[^cameraTiming^]
 
 The ADC (Analog to Digital Converter) on the MSP432 microcontroller digitizes each of the voltages output on A0 so that they can be used by the processor. When the car is on, the line-scan camera is continuously running to update the information about the car's environment. The location of the connections to the line-scan camera is displayed in [Fig. 4](#fig-4-wiring-diagram-for-line-scan-camera).
 
+#### Fig. 4: *Wiring Diagram for Line-Scan Camera*[^labManual^]
 ![Wiring Diagram for Line-Scan Camera](/docs/IEEE_Car_Race_Report_src/figs/cameraWiring.png)
-
-##### Fig. 4: *Wiring Diagram for Line-Scan Camera*[^labManual^]
 
 ### DC Motors
 The two brushed DC motors interfaced with the MCU through the RPi MC33886 motor driver board. The driver board consisted of two H-bridges, one for each motor, that allowed the motors to be controlled without damaging the MCU, due to the high current demands of the DC motors. Additionally, the H-bridges allowed the direction of the motors to be controlled through swapping the direction that current flows through the motor. The MCU used Timer A0 to set the PWM duty cycle of the two pairs of MSP432 output pins connected to the motor driver board to control the speed of the DC motors.
@@ -101,9 +97,8 @@ The servo was controlled using PWM (pulse width modulation) at a frequency of 50
 The line-scan camera pixel index corresponding to the center of the track was determined by processing the raw data obtained using the line-scan camera connected to the A2D (Analog to Digital converter), which consisted of 128 values ranging from zero to 65,535 (in practice on the track approximately 15,000 was the max. value seen), corresponding to the magnitude of light intensity seen by each pixel. The raw data was processed in two steps, first smoothing, done to reduce the effect of visual noise in the data, and then summing. Smoothing the data was done through applying a five-point moving average of the 128 luminance magnitudes, by averaging the value of each pixel with the two on either side of it. [Fig. 5](#fig-5-raw-and-filtered-line-scan-camera-data) shows the effect of applying a smoothing filter to raw data from the line-scan camera. 
 
 
+#### Fig. 5: *Raw and Filtered Line-Scan Camera Data*[^ex5^]
 ![Raw and Filtered Line-Scan Camera Data](/docs/IEEE_Car_Race_Report_src/figs/croppedLab5MATLAB.png)
-
-##### Fig. 5: *Raw and Filtered Line-Scan Camera Data*[^ex5^]
 
 After the data had been smoothed, the index of the visual center of mass was then determined by summing the magnitudes of the smoothed data and summing the indices of the data points which were weighted by the position in the array. The index of the visual center of mass was then found by dividing the weighted index sum by the summed magnitudes. The index of the visual center of mass corresponded to the center of the track.
 
@@ -146,8 +141,8 @@ After not completing a single lap during our five-minute practice session, we ha
 
 The configuration of the track on the day of the race consisted of two large loops consisting of several turns, one small loop, two intersections, and a hill, as shown in Figure 1.
 
+#### Fig. 6: *Race Day Track Configuration With Failure Points Marked*[^HarrisonTrackPhoto^]
 ![Race Day Track Configuration With Failure Points Marked](/docs/IEEE_Car_Race_Report_src/figs/InkedtrackCornerView.jpg)
-##### Fig. 6: *Race Day Track Configuration With Failure Points Marked*[^HarrisonTrackPhoto^]
 
 In the race, the car did not ultimately complete a lap around the track. In the first run, our car left the track for some unknown reason. In the second run, we set the mode to balanced, and the car made it quickly and smoothly about halfway around the track, however, it ran off the track in the marked position on Figure 1, which is marked with the points where each run left the track. The cause of this is assumed to be the line-scan camera being angled too high, with the camera seeing too far ahead of the car, causing the car to drive off course towards a different part of the track rather than stay on the continuous course. Run three had the same result, as in the high-pressure situation of the race, we did not think clearly enough to angle the camera further down between runs two and three. The improvised test track that we created and tuned on did not have the requisite turn pieces to emulate that section of the track, so going into the race, we were not aware of the dangers posed by having the camera angle too high and seeing other runs of track nearby.
 
