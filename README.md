@@ -1,6 +1,6 @@
 # TI Cup Autonomous Racecar
 
-TI MSP432 programmed using embedded C to control an autonoumous 1/18-scale car to navigate a [randomized track](#competition-track-configuration). 
+TI MSP432 programmed using embedded C to control an autonoumous 1/18-scale car to navigate a [randomized track](#fig-6-race-day-track-configuration-with-failure-points-marked). 
 
 https://github.com/atticusrussell/CMPE460_Car_Project/assets/60147768/7029acdb-6165-4c12-b1d5-a47e141b8409
 
@@ -29,9 +29,6 @@ The car is controlled using a TI MSP432P4111 microcontroller. This is connected 
 ## Track
 #### Practice track configuration
 ![practice track](docs/images/testing_track_configuration.jpg)
-
-#### Competition track configuration
-![comp-track](docs/images/report_fullsize/trackCornerView.jpg)
 
 </details>
 
