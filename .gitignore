@@ -15,7 +15,6 @@
 !.vscode/*
 # do ignore useless settings file
 .vscode/settings.json
-.vscode/c_cpp_properties.json
 #don't ignore the files that change the device config
 !RTE/Device/***.c
 !RTE/Device/***.s
