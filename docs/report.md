@@ -98,13 +98,16 @@ The servo was controlled using PWM (pulse width modulation) at a frequency of 50
 
 # Proposed Method
 ## Visual Center of Mass
-The line-scan camera pixel index corresponding to the center of the track was determined by processing the raw data obtained using the line-scan camera connected to the A2D (Analog to Digital converter), which consisted of 128 values ranging from zero to 65,535 (in practice on the track approximately 15,000 was the max. value seen), corresponding to the magnitude of light intensity seen by each pixel. The raw data was processed in two steps, first smoothing, done to reduce the effect of visual noise in the data, and then summing. Smoothing the data was done through applying a five-point moving average of the 128 luminance magnitudes, by averaging the value of each pixel with the two on either side of it.
+The line-scan camera pixel index corresponding to the center of the track was determined by processing the raw data obtained using the line-scan camera connected to the A2D (Analog to Digital converter), which consisted of 128 values ranging from zero to 65,535 (in practice on the track approximately 15,000 was the max. value seen), corresponding to the magnitude of light intensity seen by each pixel. The raw data was processed in two steps, first smoothing, done to reduce the effect of visual noise in the data, and then summing. Smoothing the data was done through applying a five-point moving average of the 128 luminance magnitudes, by averaging the value of each pixel with the two on either side of it. [Fig. 5](#fig-5-raw-and-filtered-line-scan-camera-data) shows the effect of applying a smoothing filter to raw data from the line-scan camera. 
 
-After the data had been smoothed, the index of the visual center of mass was then determined by summing the magnitudes of the smoothed data and summing the indices of the data points which were weighted by the position in the array. The index of the visual center of mass was then found by dividing the weighted index sum by the summed magnitudes. The index of the visual center of mass corresponded to the center of the track.
 
 ![Raw and Filtered Line-Scan Camera Data](/docs/IEEE_Car_Race_Report_src/figs/croppedLab5MATLAB.png)
 
 ##### Fig. 5: *Raw and Filtered Line-Scan Camera Data*[^ex5^]
+
+After the data had been smoothed, the index of the visual center of mass was then determined by summing the magnitudes of the smoothed data and summing the indices of the data points which were weighted by the position in the array. The index of the visual center of mass was then found by dividing the weighted index sum by the summed magnitudes. The index of the visual center of mass corresponded to the center of the track.
+
+$$X_{center} = \sum_{i=1}^{n} \frac{mx}{M}$$
 
 ## Carpet Detection
 To detect if the car was on carpet instead of the track, the magnitude of the smoothed data at the index corresponding to the visual center of mass was compared to a constant threshold value. If the magnitude at the visual center of mass was less than the predetermined threshold value, the car was determined to be on the carpet and was stopped accordingly.
@@ -115,6 +118,7 @@ A function was written to convert an angle in degrees into an equivalent duty cy
 ## Servo PID Control
 An algorithm for applying PID control to the steering of the front wheels was developed. The algorithm took the desired difference in angle to the center of the track (always zero degrees) and the actual angle to the center of the track, as calculated in the regular steering function. The algorithm outputted the optimal number of degrees to steer the servo. The PID algorithm kept track of the three prior steering errors and used values for Kp, Ki, and Kd determined through testing.
 
+$$u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
 ## Speed Control
 The speed was set to a constant duty cycle that allowed the car to safely get around all turns of the track. This duty cycle was found through experimentation and was about 38%.
 
