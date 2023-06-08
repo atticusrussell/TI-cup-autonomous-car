@@ -2,7 +2,7 @@
 
 TI MSP432 programmed using embedded C to control an autonoumous 1/18-scale car to navigate a [randomized track](#fig-6-race-day-track-configuration-with-failure-points-marked). 
 
-https://github.com/atticusrussell/CMPE460_Car_Project/assets/60147768/7029acdb-6165-4c12-b1d5-a47e141b8409
+![](docs/demo/fig8.gif)
 
 Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). The ultimate assessment is a time-trial race in which teams compete for the shortest lap time around a randomized track configuration. This competition is referred to as the "TI Cup" (formerly NXP Cup). See [the rules](/docs/RIT-NXP%20Car%20Rules.pdf) for more information on the contest.
 
