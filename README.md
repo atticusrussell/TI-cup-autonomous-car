@@ -1,5 +1,6 @@
 # TI Cup Autonomous Racecar
 ![Right Profile View of Car](docs/images/car/car_right_cropped.jpg)
+![Figure 8 demo](docs/demo/fig8.mp4)
 
 ## Background
 Final project for the course Interface and Digital Electronic (IDE), CMPE-460, in the Computer Engineering (CE) department at Rochester Institute of Technology (RIT). IDE students learn throughout the course to interface various peripherals with a TI MSP432 microcontroller using embedded C programming. The knowledge learned during IDE is tested by the term project, where an TI MSP432 board is used to control an autonoumous 1/18-scale car to navigate a scale track constructed from plastic segments.
