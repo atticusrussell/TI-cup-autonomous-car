@@ -42,7 +42,7 @@ The development of this project was divided into three milestones leading up to 
 
 A multitude of components were used to construct the car, and are listed in the Bill of Materials (BOM) in [Table 1](#table-ti-cup-car-bill-of-materials). The Texas Instruments MSP432 microcontroller, also known as the microcontroller unit (MCU), was used to control all other components, and was connected to a custom-made interface board. This interface board plugged into the headers on top of the MSP432 and connected the appropriate pins of the microcontroller to a RPi MC33886 motor driver board, while exposing the pins required to interface with the servo, and those to connect to the line-scan camera as shown in Fig. 1. The RPi driver board connected to the battery, and, in addition to driving the DC motors on the rear wheels of the car, provided the MSP432 with the regulated 5 volt supply required for it to run while on battery. The MCU was connected electrically through the interface board to the MG996R servo motor, which was connected to the front wheels through the use of a steering arm. The brushed DC motors on the rear wheels of the car were from DFRobot’s KIT0167. The car was powered using a Tenergy 7.2V 3800 mAh Battery Pack, which was held to the chassis using the zip ties. The MCU was additionally connected to the Parallax TSL1401-DB Line-Scan Camera Module through the interface board.
 
-## Table: TI Cup Car Bill of Materials [^BeatoBom^]
+### Table: TI Cup Car Bill of Materials [^BeatoBom^]
 
 | **Part** | **Name** | **Qty** | **Price** |
 | --- | --- | --- | --- |
@@ -96,8 +96,8 @@ The two brushed DC motors interfaced with the MCU through the RPi MC33886 motor 
 ### Servo
 The servo was controlled using PWM (pulse width modulation) at a frequency of 50 Hz (20 ms PWM period), which was implemented on the MSP432 board through the use of Timer A2. For this servo, the total range of motion was 120 degrees. Setting the PWM duty cycle to 5% turned it fully to the left, 7.5% centered it, and 10% turned the servo fully to the right.
 
-# Proposed Method
-## Visual Center of Mass
+## Proposed Method
+### Visual Center of Mass
 The line-scan camera pixel index corresponding to the center of the track was determined by processing the raw data obtained using the line-scan camera connected to the A2D (Analog to Digital converter), which consisted of 128 values ranging from zero to 65,535 (in practice on the track approximately 15,000 was the max. value seen), corresponding to the magnitude of light intensity seen by each pixel. The raw data was processed in two steps, first smoothing, done to reduce the effect of visual noise in the data, and then summing. Smoothing the data was done through applying a five-point moving average of the 128 luminance magnitudes, by averaging the value of each pixel with the two on either side of it. [Fig. 5](#fig-5-raw-and-filtered-line-scan-camera-data) shows the effect of applying a smoothing filter to raw data from the line-scan camera. 
 
 
@@ -109,35 +109,35 @@ After the data had been smoothed, the index of the visual center of mass was the
 
 $$X_{center} = \sum_{i=1}^{n} \frac{mx}{M}$$
 
-## Carpet Detection
+### Carpet Detection
 To detect if the car was on carpet instead of the track, the magnitude of the smoothed data at the index corresponding to the visual center of mass was compared to a constant threshold value. If the magnitude at the visual center of mass was less than the predetermined threshold value, the car was determined to be on the carpet and was stopped accordingly.
 
-## Servo Steering
+### Servo Steering
 A function was written to convert an angle in degrees into an equivalent duty cycle and to modify the duty cycle of the PWM signal sent to the servo accordingly. The difference in angle from the center line of the car to the center of the track was determined by subtracting the index of the visual center of mass from 64, which was half of the range of the pixels, and then multiplying the result by a steering scalar. The scaled difference was used to set the steering in degrees.
 
-## Servo PID Control
+### Servo PID Control
 An algorithm for applying PID control to the steering of the front wheels was developed. The algorithm took the desired difference in angle to the center of the track (always zero degrees) and the actual angle to the center of the track, as calculated in the regular steering function. The algorithm outputted the optimal number of degrees to steer the servo. The PID algorithm kept track of the three prior steering errors and used values for Kp, Ki, and Kd determined through testing.
 
 $$u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
-## Speed Control
+### Speed Control
 The speed was set to a constant duty cycle that allowed the car to safely get around all turns of the track. This duty cycle was found through experimentation and was about 38%.
 
 During the preparation for the race, a method of scaling the speed by the straightness of the ahead track was devised. The magnitude at the visual center of mass was taken and divided by a scalar, and the base speed was multiplied by the resulting scalar. This method allowed the car to accelerate to a higher speed on straights but maintain a controllable speed when in corners.
 
-## Differential Thrust
+### Differential Thrust
 Differential thrust for turning was implemented in the design to supplement the limited range of motion inherent to the steering servo, which limited the maximum steering angle to 60 degrees. The differential thrust aids in turning the car by slowing the rotation speed of the inner wheel by an amount proportional to the severity of the turn, by reducing the speed of the motor driving that wheel. The speed of the outer wheel was slightly increased in proportion to turn severity.
 
-## Driving Modes
+### Driving Modes
 Three driving modes were implemented, each with a different level of tested reliability in completing the course successfully. The modes were "reckless", "balanced", and "conservative". Reckless mode drove the car at the highest reasonable speed, balanced mode put the car at the normal speed, and conservative mode brought the car to the lowest speed. Each mode corresponded to a particular set of car settings that modified items such as base speed, turning scalar, and enabled or disabled certain functionality like PID steering, differential thrust, and scaled speed controls.
 
 The driving modes were cycled through using a button on the MSP432, and the selected mode was indicated using the RGB LED on the board. Reckless mode had the highest base speed and nearly all features enabled, including PID steering. Balanced mode had a slightly lower base speed and all features enabled except for PID steering. The conservative mode disabled all but the most basic features and used a fixed speed.
 
-## Additional Functionality
+### Additional Functionality
 Arming and disarming functionality was implemented to avoid accidents when flashing or operating the car. When the car was disarmed, the DC motors and the servo were disabled, and when it was armed, they were enabled. A button on the MCU was used to toggle between armed and disarmed states. The status of the car was indicated using LED1. When disarmed, LED1 was off, and when armed, it was turned on. A 1.5-second delay was added when transitioning from disarmed to armed, during which time LED2 would countdown by turning red, yellow, and then green when the car was in the armed state.
 
 When not being used for mode selection or countdown, the color of LED2 was set based on the magnitude of the visual center of mass value to provide usefu l insight about the car's perception during development and tweaking the camera position.
 
-# Results
+## Results
 Prior to race day, our car appeared poised to place in the top three spots during the race. During testing, across all of the different track configurations, our car, operating in balanced mode, had set the fastest unofficial times in a very consistent manner, when compared to other teams benchmarking and timing their cars.
 
 Knowing that the camera position was extremely important and sensitive to the performance of the car, we did not remove or adjust the camera between testing sessions and the day of the race. Despite this, when our five-minute practice session arrived on the day of the race, the car drove straight off the edge of the track. This is still unexplained, and we do not have any significant theories as to why this occurred. The most probable explanation is that we had not yet had a test track set up in the part of the room where the start line was, so the lighting could have been different, but this seems implausible, as we did all testing in that room, and the lighting seemed rather uniform.
@@ -151,7 +151,7 @@ The configuration of the track on the day of the race consisted of two large loo
 
 In the race, the car did not ultimately complete a lap around the track. In the first run, our car left the track for some unknown reason. In the second run, we set the mode to balanced, and the car made it quickly and smoothly about halfway around the track, however, it ran off the track in the marked position on Figure 1, which is marked with the points where each run left the track. The cause of this is assumed to be the line-scan camera being angled too high, with the camera seeing too far ahead of the car, causing the car to drive off course towards a different part of the track rather than stay on the continuous course. Run three had the same result, as in the high-pressure situation of the race, we did not think clearly enough to angle the camera further down between runs two and three. The improvised test track that we created and tuned on did not have the requisite turn pieces to emulate that section of the track, so going into the race, we were not aware of the dangers posed by having the camera angle too high and seeing other runs of track nearby.
 
-# Conclusion
+## Conclusion
 Ultimately, this car did not place in the top seven in the TI Cup, nor did it finish a full lap, but the design was successful in completing the three milestones prior to the race and was fast and consistent in the days leading up to the race. Minor modifications to the physical placement of the line-scan camera would likely improve results in the future. The TI Cup was a beneficial opportunity for students to apply their classroom knowledge and problem-solving abilities in a real-world application.
 
 [^CarPhoto^]: A. Russell, Photo of TI Car. 7 Dec. 2022
